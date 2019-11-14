@@ -43,9 +43,7 @@ contract DaiFi is DaiFiActions {
     }
 }
 
-// TODO: add withdraw (and repay!) abstract supply / borrow / dai / wei???
 // TODO: abstract supplying and borrowing across wei/dai?
-// TODO: DO BORROW!!!
-// TODO: timelocked admin?
+// TODO: collateral calculation.
 // TODO: abstracted interest rate model / price oracle / etc.
-// TODO: Unittroller pattern??? prob not...
+// TODO: add timelocked admin?
