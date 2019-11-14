@@ -1,0 +1,1347 @@
+{
+  "contractName": "DaiFi",
+  "abi": [
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "daiAddress",
+          "type": "address"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "constructor"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "internalType": "address",
+          "name": "account",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "amount",
+          "type": "uint256"
+        }
+      ],
+      "name": "AttoDaiSupplied",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "internalType": "address",
+          "name": "account",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "amount",
+          "type": "uint256"
+        }
+      ],
+      "name": "WeiSupplied",
+      "type": "event"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "amount",
+          "type": "uint256"
+        }
+      ],
+      "name": "supplyAttoDai",
+      "outputs": [],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [],
+      "name": "supplyWei",
+      "outputs": [],
+      "payable": true,
+      "stateMutability": "payable",
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "amount",
+          "type": "uint256"
+        }
+      ],
+      "name": "withdrawAttoDai",
+      "outputs": [],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "amount",
+          "type": "uint256"
+        }
+      ],
+      "name": "withdrawWei",
+      "outputs": [],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "getTotalWei",
+      "outputs": [
+        {
+          "components": [
+            {
+              "internalType": "uint256",
+              "name": "supplied",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "borrowed",
+              "type": "uint256"
+            }
+          ],
+          "internalType": "struct Types.Balances",
+          "name": "",
+          "type": "tuple"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "getTotalAttoDai",
+      "outputs": [
+        {
+          "components": [
+            {
+              "internalType": "uint256",
+              "name": "supplied",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "borrowed",
+              "type": "uint256"
+            }
+          ],
+          "internalType": "struct Types.Balances",
+          "name": "",
+          "type": "tuple"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "accountAddress",
+          "type": "address"
+        }
+      ],
+      "name": "getAccount",
+      "outputs": [
+        {
+          "components": [
+            {
+              "components": [
+                {
+                  "internalType": "uint256",
+                  "name": "supplied",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "borrowed",
+                  "type": "uint256"
+                }
+              ],
+              "internalType": "struct Types.Balances",
+              "name": "wei_",
+              "type": "tuple"
+            },
+            {
+              "components": [
+                {
+                  "internalType": "uint256",
+                  "name": "supplied",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "borrowed",
+                  "type": "uint256"
+                }
+              ],
+              "internalType": "struct Types.Balances",
+              "name": "attoDai",
+              "type": "tuple"
+            }
+          ],
+          "internalType": "struct Types.Account",
+          "name": "",
+          "type": "tuple"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    }
+  ],
+  "metadata": "{\"compiler\":{\"version\":\"0.5.12+commit.7709ece9\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"inputs\":[{\"internalType\":\"address\",\"name\":\"daiAddress\",\"type\":\"address\"}],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"constructor\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"amount\",\"type\":\"uint256\"}],\"name\":\"AttoDaiSupplied\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"amount\",\"type\":\"uint256\"}],\"name\":\"WeiSupplied\",\"type\":\"event\"},{\"constant\":true,\"inputs\":[{\"internalType\":\"address\",\"name\":\"accountAddress\",\"type\":\"address\"}],\"name\":\"getAccount\",\"outputs\":[{\"components\":[{\"components\":[{\"internalType\":\"uint256\",\"name\":\"supplied\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"borrowed\",\"type\":\"uint256\"}],\"internalType\":\"struct Types.Balances\",\"name\":\"wei_\",\"type\":\"tuple\"},{\"components\":[{\"internalType\":\"uint256\",\"name\":\"supplied\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"borrowed\",\"type\":\"uint256\"}],\"internalType\":\"struct Types.Balances\",\"name\":\"attoDai\",\"type\":\"tuple\"}],\"internalType\":\"struct Types.Account\",\"name\":\"\",\"type\":\"tuple\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"getTotalAttoDai\",\"outputs\":[{\"components\":[{\"internalType\":\"uint256\",\"name\":\"supplied\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"borrowed\",\"type\":\"uint256\"}],\"internalType\":\"struct Types.Balances\",\"name\":\"\",\"type\":\"tuple\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"getTotalWei\",\"outputs\":[{\"components\":[{\"internalType\":\"uint256\",\"name\":\"supplied\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"borrowed\",\"type\":\"uint256\"}],\"internalType\":\"struct Types.Balances\",\"name\":\"\",\"type\":\"tuple\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"amount\",\"type\":\"uint256\"}],\"name\":\"supplyAttoDai\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[],\"name\":\"supplyWei\",\"outputs\":[],\"payable\":true,\"stateMutability\":\"payable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"amount\",\"type\":\"uint256\"}],\"name\":\"withdrawAttoDai\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"amount\",\"type\":\"uint256\"}],\"name\":\"withdrawWei\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"}],\"devdoc\":{\"author\":\"DaiFi\",\"methods\":{\"constructor\":{\"params\":{\"daiAddress\":\"The address of the Dai token\"}},\"getAccount(address)\":{\"params\":{\"accountAddress\":\"The address of the account\"},\"return\":\"The account\"},\"getTotalAttoDai()\":{\"return\":\"The total attoDai balances\"},\"getTotalWei()\":{\"return\":\"The total Wei balances\"},\"supplyAttoDai(uint256)\":{\"params\":{\"amount\":\"The amount of attoDai to supply\"}},\"withdrawAttoDai(uint256)\":{\"params\":{\"amount\":\"The amount of attoDai to withdraw\"}},\"withdrawWei(uint256)\":{\"params\":{\"amount\":\"The amount of Wei to withdraw\"}}},\"title\":\"DaiFi Contract\"},\"userdoc\":{\"methods\":{\"constructor\":\"constructor sets the Dai contract address from the given address (public)\",\"getAccount(address)\":{\"notice\":\"Gets the account for the given address (external view)\"},\"getTotalAttoDai()\":{\"notice\":\"Gets the balances of total attoDai (external view)\"},\"getTotalWei()\":{\"notice\":\"Gets the balances of total Wei (external view)\"},\"supplyAttoDai(uint256)\":{\"notice\":\"Supply attoDai from sender account (external nonReentrant)\"},\"supplyWei()\":{\"notice\":\"Supply Wei from sender account (external payable nonReentrant)\"},\"withdrawAttoDai(uint256)\":{\"notice\":\"Withdraw attoDai to sender account (external)\"},\"withdrawWei(uint256)\":{\"notice\":\"Withdraw Wei to sender account (external)\"}},\"notice\":\"The DaiFi main contract\"}},\"settings\":{\"compilationTarget\":{\"/mnt/c/Users/Gareth/Documents/GitHub/DaiFi/contracts/DaiFi.sol\":\"DaiFi\"},\"evmVersion\":\"byzantium\",\"libraries\":{},\"optimizer\":{\"enabled\":true,\"runs\":200},\"remappings\":[]},\"sources\":{\"/mnt/c/Users/Gareth/Documents/GitHub/DaiFi/contracts/DaiFi.sol\":{\"keccak256\":\"0x496bf66a2de9082167f1b8e7e94bd442fbc8ff7381878b6107cc0266e1c4da4e\",\"urls\":[\"bzz-raw://4f3ea7d946d334c131394df95ecd4cc79f4275038685c8f399ab0ee58af6edf4\",\"dweb:/ipfs/QmWFexQQPo58cNdxrBbHZ6YS77sbkoW2PwzH9Kwo2acbgL\"]},\"/mnt/c/Users/Gareth/Documents/GitHub/DaiFi/contracts/implementations/DaiFiActions.sol\":{\"keccak256\":\"0xc063c9a0b895793c602ea066ca1181e9dacb37b05285b51a3ec31fb5f5febc00\",\"urls\":[\"bzz-raw://37ad78f53eb6538905252adfc7459eda62de1c26d1d2d5909e3b554c2c9730be\",\"dweb:/ipfs/QmSXpSXRjRMwVQwMsW43LxRqc3WQXsbWbFaJpecRUZYcmx\"]},\"/mnt/c/Users/Gareth/Documents/GitHub/DaiFi/contracts/interfaces/IActions.sol\":{\"keccak256\":\"0xd2d2738b33bbf4339441c880e043e1cd201273ea79a2959fc85a86dfc32e90d6\",\"urls\":[\"bzz-raw://79c7c178cfc83a21cd8726fc56458f107b23e70491770d3739e730343e65e549\",\"dweb:/ipfs/QmWSWGWR6TxboNJG5dGM9tT6uSqveZHyJF9KAm9op1aHso\"]},\"/mnt/c/Users/Gareth/Documents/GitHub/DaiFi/contracts/interfaces/IERC20.sol\":{\"keccak256\":\"0x3f94813793e89cd724e66cc1318886897fb7dd84d60e23bede80e8865689128c\",\"urls\":[\"bzz-raw://9824e5f0a59e7cfe47bff3fbc26ab1a1f791321214f8f6a87c7424ec63fabe08\",\"dweb:/ipfs/QmZ7YTEeQhmthDmZXhYNKJWXErkGkKTRfRRn2HyVA71sc7\"]},\"/mnt/c/Users/Gareth/Documents/GitHub/DaiFi/contracts/lib/ReentrancyGuard.sol\":{\"keccak256\":\"0xbe98009c59347ff701676ef4a44e021a49ff0ca054dff2d48657a05587037aa4\",\"urls\":[\"bzz-raw://8a1f5821d86721c93357ad1e693036cfddffbe2bf53ae593396df0dbf39c29a8\",\"dweb:/ipfs/QmRU26brcG9s4csgcHCE1NzcfBkp5PXVV2NHxZVfk3xwj2\"]},\"/mnt/c/Users/Gareth/Documents/GitHub/DaiFi/contracts/lib/SafeMath.sol\":{\"keccak256\":\"0xeb295b448107f6adee6c0861eba7cd58983eeb1a2bf9cd24b3df9c75fe17db75\",\"urls\":[\"bzz-raw://781a662595af8ecda052135a27529293189c1cdf40bc5e2934a62b3bc2b327ea\",\"dweb:/ipfs/QmNaGn5PyRCu3tfBu6mMwx3j2BHJiXWKiYGHSAu3au6P7S\"]},\"/mnt/c/Users/Gareth/Documents/GitHub/DaiFi/contracts/lib/Token.sol\":{\"keccak256\":\"0xefd604eb26fa5e57ac4feea1358f0594cb027a8105dc3651aa966c174ec68e21\",\"urls\":[\"bzz-raw://fe91994966a49a4eaa827664a7ca61c7f67d987f96a158d65321ea79e61d86cd\",\"dweb:/ipfs/QmeKkZwkbk9jjLfKR14Ab8XPLfcNuGoRXDuZiPq9Cb426a\"]},\"/mnt/c/Users/Gareth/Documents/GitHub/DaiFi/contracts/lib/Types.sol\":{\"keccak256\":\"0x146d39804a6c81920d90042fae97bc553bc78de53fef92b93998916c39176549\",\"urls\":[\"bzz-raw://4500431db3efe79d549e1768ef77e1e17276bf0579c14d9e4b86df3be5a3953f\",\"dweb:/ipfs/QmWbbGUi7ao1A2NNaCTT1Mvdwvc23GdVNobt5xHMhcDwYP\"]}},\"version\":1}",
+  "bytecode": "0x",
+  "deployedBytecode": "0x",
+  "sourceMap": "",
+  "deployedSourceMap": "",
+  "source": "pragma solidity 0.5.12;\r\npragma experimental ABIEncoderV2;\r\n\r\nimport { DaiFiActions } from \"./implementations/DaiFiActions.sol\";\r\nimport { Types } from \"./lib/Types.sol\";\r\n\r\n/**\r\n* @title DaiFi Contract\r\n* @notice The DaiFi main contract\r\n* @author DaiFi\r\n*/\r\ncontract DaiFi is DaiFiActions {\r\n\r\n    /**\r\n     * @notice constructor sets the Dai contract address from the given address (public)\r\n     * @param daiAddress The address of the Dai token\r\n     */\r\n    constructor(address daiAddress) DaiFiActions(daiAddress) public {}\r\n\r\n    /**\r\n     * @notice Gets the balances of total Wei (external view)\r\n     * @return The total Wei balances\r\n     */\r\n    function getTotalWei() external view returns (Types.Balances memory) {\r\n        return totalWei;\r\n    }\r\n\r\n    /**\r\n     * @notice Gets the balances of total attoDai (external view)\r\n     * @return The total attoDai balances\r\n     */\r\n    function getTotalAttoDai() external view returns (Types.Balances memory) {\r\n        return totalAttoDai;\r\n    }\r\n\r\n    /**\r\n     * @notice Gets the account for the given address (external view)\r\n     * @param accountAddress The address of the account\r\n     * @return The account\r\n     */\r\n    function getAccount(address accountAddress) external view returns (Types.Account memory) {\r\n        return accounts[accountAddress];\r\n    }\r\n}\r\n\r\n// TODO: add withdraw (and repay!) abstract supply / borrow / dai / wei???\r\n// TODO: abstract supplying and borrowing across wei/dai?\r\n// TODO: DO BORROW!!!\r\n// TODO: timelocked admin?\r\n// TODO: abstracted interest rate model / price oracle / etc.\r\n// TODO: Unittroller pattern??? prob not...\r\n",
+  "sourcePath": "/mnt/c/Users/Gareth/Documents/GitHub/DaiFi/contracts/DaiFi.sol",
+  "ast": {
+    "absolutePath": "/mnt/c/Users/Gareth/Documents/GitHub/DaiFi/contracts/DaiFi.sol",
+    "exportedSymbols": {
+      "DaiFi": [
+        46
+      ]
+    },
+    "id": 47,
+    "nodeType": "SourceUnit",
+    "nodes": [
+      {
+        "id": 1,
+        "literals": [
+          "solidity",
+          "0.5",
+          ".12"
+        ],
+        "nodeType": "PragmaDirective",
+        "src": "0:23:0"
+      },
+      {
+        "id": 2,
+        "literals": [
+          "experimental",
+          "ABIEncoderV2"
+        ],
+        "nodeType": "PragmaDirective",
+        "src": "25:33:0"
+      },
+      {
+        "absolutePath": "/mnt/c/Users/Gareth/Documents/GitHub/DaiFi/contracts/implementations/DaiFiActions.sol",
+        "file": "./implementations/DaiFiActions.sol",
+        "id": 4,
+        "nodeType": "ImportDirective",
+        "scope": 47,
+        "sourceUnit": 658,
+        "src": "62:66:0",
+        "symbolAliases": [
+          {
+            "foreign": 3,
+            "local": null
+          }
+        ],
+        "unitAlias": ""
+      },
+      {
+        "absolutePath": "/mnt/c/Users/Gareth/Documents/GitHub/DaiFi/contracts/lib/Types.sol",
+        "file": "./lib/Types.sol",
+        "id": 6,
+        "nodeType": "ImportDirective",
+        "scope": 47,
+        "sourceUnit": 1032,
+        "src": "130:40:0",
+        "symbolAliases": [
+          {
+            "foreign": 5,
+            "local": null
+          }
+        ],
+        "unitAlias": ""
+      },
+      {
+        "baseContracts": [
+          {
+            "arguments": null,
+            "baseName": {
+              "contractScope": null,
+              "id": 7,
+              "name": "DaiFiActions",
+              "nodeType": "UserDefinedTypeName",
+              "referencedDeclaration": 657,
+              "src": "278:12:0",
+              "typeDescriptions": {
+                "typeIdentifier": "t_contract$_DaiFiActions_$657",
+                "typeString": "contract DaiFiActions"
+              }
+            },
+            "id": 8,
+            "nodeType": "InheritanceSpecifier",
+            "src": "278:12:0"
+          }
+        ],
+        "contractDependencies": [
+          657,
+          690,
+          791
+        ],
+        "contractKind": "contract",
+        "documentation": "@title DaiFi Contract\n@notice The DaiFi main contract\n@author DaiFi",
+        "fullyImplemented": false,
+        "id": 46,
+        "linearizedBaseContracts": [
+          46,
+          657,
+          791,
+          690
+        ],
+        "name": "DaiFi",
+        "nodeType": "ContractDefinition",
+        "nodes": [
+          {
+            "body": {
+              "id": 16,
+              "nodeType": "Block",
+              "src": "527:2:0",
+              "statements": []
+            },
+            "documentation": "@notice constructor sets the Dai contract address from the given address (public)\n@param daiAddress The address of the Dai token",
+            "id": 17,
+            "implemented": true,
+            "kind": "constructor",
+            "modifiers": [
+              {
+                "arguments": [
+                  {
+                    "argumentTypes": null,
+                    "id": 13,
+                    "name": "daiAddress",
+                    "nodeType": "Identifier",
+                    "overloadedDeclarations": [],
+                    "referencedDeclaration": 10,
+                    "src": "508:10:0",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  }
+                ],
+                "id": 14,
+                "modifierName": {
+                  "argumentTypes": null,
+                  "id": 12,
+                  "name": "DaiFiActions",
+                  "nodeType": "Identifier",
+                  "overloadedDeclarations": [],
+                  "referencedDeclaration": 657,
+                  "src": "495:12:0",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_type$_t_contract$_DaiFiActions_$657_$",
+                    "typeString": "type(contract DaiFiActions)"
+                  }
+                },
+                "nodeType": "ModifierInvocation",
+                "src": "495:24:0"
+              }
+            ],
+            "name": "",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 11,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 10,
+                  "name": "daiAddress",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 17,
+                  "src": "475:18:0",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 9,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "475:7:0",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                }
+              ],
+              "src": "474:20:0"
+            },
+            "returnParameters": {
+              "id": 15,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "527:0:0"
+            },
+            "scope": 46,
+            "src": "463:66:0",
+            "stateMutability": "nonpayable",
+            "superFunction": null,
+            "visibility": "public"
+          },
+          {
+            "body": {
+              "id": 24,
+              "nodeType": "Block",
+              "src": "726:34:0",
+              "statements": [
+                {
+                  "expression": {
+                    "argumentTypes": null,
+                    "id": 22,
+                    "name": "totalWei",
+                    "nodeType": "Identifier",
+                    "overloadedDeclarations": [],
+                    "referencedDeclaration": 528,
+                    "src": "744:8:0",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_struct$_Balances_$1025_storage",
+                      "typeString": "struct Types.Balances storage ref"
+                    }
+                  },
+                  "functionReturnParameters": 21,
+                  "id": 23,
+                  "nodeType": "Return",
+                  "src": "737:15:0"
+                }
+              ]
+            },
+            "documentation": "@notice Gets the balances of total Wei (external view)\n@return The total Wei balances",
+            "id": 25,
+            "implemented": true,
+            "kind": "function",
+            "modifiers": [],
+            "name": "getTotalWei",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 18,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "677:2:0"
+            },
+            "returnParameters": {
+              "id": 21,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 20,
+                  "name": "",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 25,
+                  "src": "703:21:0",
+                  "stateVariable": false,
+                  "storageLocation": "memory",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_struct$_Balances_$1025_memory_ptr",
+                    "typeString": "struct Types.Balances"
+                  },
+                  "typeName": {
+                    "contractScope": null,
+                    "id": 19,
+                    "name": "Types.Balances",
+                    "nodeType": "UserDefinedTypeName",
+                    "referencedDeclaration": 1025,
+                    "src": "703:14:0",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_struct$_Balances_$1025_storage_ptr",
+                      "typeString": "struct Types.Balances"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                }
+              ],
+              "src": "702:23:0"
+            },
+            "scope": 46,
+            "src": "657:103:0",
+            "stateMutability": "view",
+            "superFunction": null,
+            "visibility": "external"
+          },
+          {
+            "body": {
+              "id": 32,
+              "nodeType": "Block",
+              "src": "969:38:0",
+              "statements": [
+                {
+                  "expression": {
+                    "argumentTypes": null,
+                    "id": 30,
+                    "name": "totalAttoDai",
+                    "nodeType": "Identifier",
+                    "overloadedDeclarations": [],
+                    "referencedDeclaration": 530,
+                    "src": "987:12:0",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_struct$_Balances_$1025_storage",
+                      "typeString": "struct Types.Balances storage ref"
+                    }
+                  },
+                  "functionReturnParameters": 29,
+                  "id": 31,
+                  "nodeType": "Return",
+                  "src": "980:19:0"
+                }
+              ]
+            },
+            "documentation": "@notice Gets the balances of total attoDai (external view)\n@return The total attoDai balances",
+            "id": 33,
+            "implemented": true,
+            "kind": "function",
+            "modifiers": [],
+            "name": "getTotalAttoDai",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 26,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "920:2:0"
+            },
+            "returnParameters": {
+              "id": 29,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 28,
+                  "name": "",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 33,
+                  "src": "946:21:0",
+                  "stateVariable": false,
+                  "storageLocation": "memory",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_struct$_Balances_$1025_memory_ptr",
+                    "typeString": "struct Types.Balances"
+                  },
+                  "typeName": {
+                    "contractScope": null,
+                    "id": 27,
+                    "name": "Types.Balances",
+                    "nodeType": "UserDefinedTypeName",
+                    "referencedDeclaration": 1025,
+                    "src": "946:14:0",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_struct$_Balances_$1025_storage_ptr",
+                      "typeString": "struct Types.Balances"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                }
+              ],
+              "src": "945:23:0"
+            },
+            "scope": 46,
+            "src": "896:111:0",
+            "stateMutability": "view",
+            "superFunction": null,
+            "visibility": "external"
+          },
+          {
+            "body": {
+              "id": 44,
+              "nodeType": "Block",
+              "src": "1278:50:0",
+              "statements": [
+                {
+                  "expression": {
+                    "argumentTypes": null,
+                    "baseExpression": {
+                      "argumentTypes": null,
+                      "id": 40,
+                      "name": "accounts",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [],
+                      "referencedDeclaration": 534,
+                      "src": "1296:8:0",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_mapping$_t_address_$_t_struct$_Account_$1030_storage_$",
+                        "typeString": "mapping(address => struct Types.Account storage ref)"
+                      }
+                    },
+                    "id": 42,
+                    "indexExpression": {
+                      "argumentTypes": null,
+                      "id": 41,
+                      "name": "accountAddress",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [],
+                      "referencedDeclaration": 35,
+                      "src": "1305:14:0",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_address",
+                        "typeString": "address"
+                      }
+                    },
+                    "isConstant": false,
+                    "isLValue": true,
+                    "isPure": false,
+                    "lValueRequested": false,
+                    "nodeType": "IndexAccess",
+                    "src": "1296:24:0",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_struct$_Account_$1030_storage",
+                      "typeString": "struct Types.Account storage ref"
+                    }
+                  },
+                  "functionReturnParameters": 39,
+                  "id": 43,
+                  "nodeType": "Return",
+                  "src": "1289:31:0"
+                }
+              ]
+            },
+            "documentation": "@notice Gets the account for the given address (external view)\n@param accountAddress The address of the account\n@return The account",
+            "id": 45,
+            "implemented": true,
+            "kind": "function",
+            "modifiers": [],
+            "name": "getAccount",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 36,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 35,
+                  "name": "accountAddress",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 45,
+                  "src": "1209:22:0",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 34,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1209:7:0",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                }
+              ],
+              "src": "1208:24:0"
+            },
+            "returnParameters": {
+              "id": 39,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 38,
+                  "name": "",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 45,
+                  "src": "1256:20:0",
+                  "stateVariable": false,
+                  "storageLocation": "memory",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_struct$_Account_$1030_memory_ptr",
+                    "typeString": "struct Types.Account"
+                  },
+                  "typeName": {
+                    "contractScope": null,
+                    "id": 37,
+                    "name": "Types.Account",
+                    "nodeType": "UserDefinedTypeName",
+                    "referencedDeclaration": 1030,
+                    "src": "1256:13:0",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_struct$_Account_$1030_storage_ptr",
+                      "typeString": "struct Types.Account"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                }
+              ],
+              "src": "1255:22:0"
+            },
+            "scope": 46,
+            "src": "1189:139:0",
+            "stateMutability": "view",
+            "superFunction": null,
+            "visibility": "external"
+          }
+        ],
+        "scope": 47,
+        "src": "260:1071:0"
+      }
+    ],
+    "src": "0:1629:0"
+  },
+  "legacyAST": {
+    "absolutePath": "/mnt/c/Users/Gareth/Documents/GitHub/DaiFi/contracts/DaiFi.sol",
+    "exportedSymbols": {
+      "DaiFi": [
+        46
+      ]
+    },
+    "id": 47,
+    "nodeType": "SourceUnit",
+    "nodes": [
+      {
+        "id": 1,
+        "literals": [
+          "solidity",
+          "0.5",
+          ".12"
+        ],
+        "nodeType": "PragmaDirective",
+        "src": "0:23:0"
+      },
+      {
+        "id": 2,
+        "literals": [
+          "experimental",
+          "ABIEncoderV2"
+        ],
+        "nodeType": "PragmaDirective",
+        "src": "25:33:0"
+      },
+      {
+        "absolutePath": "/mnt/c/Users/Gareth/Documents/GitHub/DaiFi/contracts/implementations/DaiFiActions.sol",
+        "file": "./implementations/DaiFiActions.sol",
+        "id": 4,
+        "nodeType": "ImportDirective",
+        "scope": 47,
+        "sourceUnit": 658,
+        "src": "62:66:0",
+        "symbolAliases": [
+          {
+            "foreign": 3,
+            "local": null
+          }
+        ],
+        "unitAlias": ""
+      },
+      {
+        "absolutePath": "/mnt/c/Users/Gareth/Documents/GitHub/DaiFi/contracts/lib/Types.sol",
+        "file": "./lib/Types.sol",
+        "id": 6,
+        "nodeType": "ImportDirective",
+        "scope": 47,
+        "sourceUnit": 1032,
+        "src": "130:40:0",
+        "symbolAliases": [
+          {
+            "foreign": 5,
+            "local": null
+          }
+        ],
+        "unitAlias": ""
+      },
+      {
+        "baseContracts": [
+          {
+            "arguments": null,
+            "baseName": {
+              "contractScope": null,
+              "id": 7,
+              "name": "DaiFiActions",
+              "nodeType": "UserDefinedTypeName",
+              "referencedDeclaration": 657,
+              "src": "278:12:0",
+              "typeDescriptions": {
+                "typeIdentifier": "t_contract$_DaiFiActions_$657",
+                "typeString": "contract DaiFiActions"
+              }
+            },
+            "id": 8,
+            "nodeType": "InheritanceSpecifier",
+            "src": "278:12:0"
+          }
+        ],
+        "contractDependencies": [
+          657,
+          690,
+          791
+        ],
+        "contractKind": "contract",
+        "documentation": "@title DaiFi Contract\n@notice The DaiFi main contract\n@author DaiFi",
+        "fullyImplemented": false,
+        "id": 46,
+        "linearizedBaseContracts": [
+          46,
+          657,
+          791,
+          690
+        ],
+        "name": "DaiFi",
+        "nodeType": "ContractDefinition",
+        "nodes": [
+          {
+            "body": {
+              "id": 16,
+              "nodeType": "Block",
+              "src": "527:2:0",
+              "statements": []
+            },
+            "documentation": "@notice constructor sets the Dai contract address from the given address (public)\n@param daiAddress The address of the Dai token",
+            "id": 17,
+            "implemented": true,
+            "kind": "constructor",
+            "modifiers": [
+              {
+                "arguments": [
+                  {
+                    "argumentTypes": null,
+                    "id": 13,
+                    "name": "daiAddress",
+                    "nodeType": "Identifier",
+                    "overloadedDeclarations": [],
+                    "referencedDeclaration": 10,
+                    "src": "508:10:0",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  }
+                ],
+                "id": 14,
+                "modifierName": {
+                  "argumentTypes": null,
+                  "id": 12,
+                  "name": "DaiFiActions",
+                  "nodeType": "Identifier",
+                  "overloadedDeclarations": [],
+                  "referencedDeclaration": 657,
+                  "src": "495:12:0",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_type$_t_contract$_DaiFiActions_$657_$",
+                    "typeString": "type(contract DaiFiActions)"
+                  }
+                },
+                "nodeType": "ModifierInvocation",
+                "src": "495:24:0"
+              }
+            ],
+            "name": "",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 11,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 10,
+                  "name": "daiAddress",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 17,
+                  "src": "475:18:0",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 9,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "475:7:0",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                }
+              ],
+              "src": "474:20:0"
+            },
+            "returnParameters": {
+              "id": 15,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "527:0:0"
+            },
+            "scope": 46,
+            "src": "463:66:0",
+            "stateMutability": "nonpayable",
+            "superFunction": null,
+            "visibility": "public"
+          },
+          {
+            "body": {
+              "id": 24,
+              "nodeType": "Block",
+              "src": "726:34:0",
+              "statements": [
+                {
+                  "expression": {
+                    "argumentTypes": null,
+                    "id": 22,
+                    "name": "totalWei",
+                    "nodeType": "Identifier",
+                    "overloadedDeclarations": [],
+                    "referencedDeclaration": 528,
+                    "src": "744:8:0",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_struct$_Balances_$1025_storage",
+                      "typeString": "struct Types.Balances storage ref"
+                    }
+                  },
+                  "functionReturnParameters": 21,
+                  "id": 23,
+                  "nodeType": "Return",
+                  "src": "737:15:0"
+                }
+              ]
+            },
+            "documentation": "@notice Gets the balances of total Wei (external view)\n@return The total Wei balances",
+            "id": 25,
+            "implemented": true,
+            "kind": "function",
+            "modifiers": [],
+            "name": "getTotalWei",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 18,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "677:2:0"
+            },
+            "returnParameters": {
+              "id": 21,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 20,
+                  "name": "",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 25,
+                  "src": "703:21:0",
+                  "stateVariable": false,
+                  "storageLocation": "memory",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_struct$_Balances_$1025_memory_ptr",
+                    "typeString": "struct Types.Balances"
+                  },
+                  "typeName": {
+                    "contractScope": null,
+                    "id": 19,
+                    "name": "Types.Balances",
+                    "nodeType": "UserDefinedTypeName",
+                    "referencedDeclaration": 1025,
+                    "src": "703:14:0",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_struct$_Balances_$1025_storage_ptr",
+                      "typeString": "struct Types.Balances"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                }
+              ],
+              "src": "702:23:0"
+            },
+            "scope": 46,
+            "src": "657:103:0",
+            "stateMutability": "view",
+            "superFunction": null,
+            "visibility": "external"
+          },
+          {
+            "body": {
+              "id": 32,
+              "nodeType": "Block",
+              "src": "969:38:0",
+              "statements": [
+                {
+                  "expression": {
+                    "argumentTypes": null,
+                    "id": 30,
+                    "name": "totalAttoDai",
+                    "nodeType": "Identifier",
+                    "overloadedDeclarations": [],
+                    "referencedDeclaration": 530,
+                    "src": "987:12:0",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_struct$_Balances_$1025_storage",
+                      "typeString": "struct Types.Balances storage ref"
+                    }
+                  },
+                  "functionReturnParameters": 29,
+                  "id": 31,
+                  "nodeType": "Return",
+                  "src": "980:19:0"
+                }
+              ]
+            },
+            "documentation": "@notice Gets the balances of total attoDai (external view)\n@return The total attoDai balances",
+            "id": 33,
+            "implemented": true,
+            "kind": "function",
+            "modifiers": [],
+            "name": "getTotalAttoDai",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 26,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "920:2:0"
+            },
+            "returnParameters": {
+              "id": 29,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 28,
+                  "name": "",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 33,
+                  "src": "946:21:0",
+                  "stateVariable": false,
+                  "storageLocation": "memory",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_struct$_Balances_$1025_memory_ptr",
+                    "typeString": "struct Types.Balances"
+                  },
+                  "typeName": {
+                    "contractScope": null,
+                    "id": 27,
+                    "name": "Types.Balances",
+                    "nodeType": "UserDefinedTypeName",
+                    "referencedDeclaration": 1025,
+                    "src": "946:14:0",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_struct$_Balances_$1025_storage_ptr",
+                      "typeString": "struct Types.Balances"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                }
+              ],
+              "src": "945:23:0"
+            },
+            "scope": 46,
+            "src": "896:111:0",
+            "stateMutability": "view",
+            "superFunction": null,
+            "visibility": "external"
+          },
+          {
+            "body": {
+              "id": 44,
+              "nodeType": "Block",
+              "src": "1278:50:0",
+              "statements": [
+                {
+                  "expression": {
+                    "argumentTypes": null,
+                    "baseExpression": {
+                      "argumentTypes": null,
+                      "id": 40,
+                      "name": "accounts",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [],
+                      "referencedDeclaration": 534,
+                      "src": "1296:8:0",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_mapping$_t_address_$_t_struct$_Account_$1030_storage_$",
+                        "typeString": "mapping(address => struct Types.Account storage ref)"
+                      }
+                    },
+                    "id": 42,
+                    "indexExpression": {
+                      "argumentTypes": null,
+                      "id": 41,
+                      "name": "accountAddress",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [],
+                      "referencedDeclaration": 35,
+                      "src": "1305:14:0",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_address",
+                        "typeString": "address"
+                      }
+                    },
+                    "isConstant": false,
+                    "isLValue": true,
+                    "isPure": false,
+                    "lValueRequested": false,
+                    "nodeType": "IndexAccess",
+                    "src": "1296:24:0",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_struct$_Account_$1030_storage",
+                      "typeString": "struct Types.Account storage ref"
+                    }
+                  },
+                  "functionReturnParameters": 39,
+                  "id": 43,
+                  "nodeType": "Return",
+                  "src": "1289:31:0"
+                }
+              ]
+            },
+            "documentation": "@notice Gets the account for the given address (external view)\n@param accountAddress The address of the account\n@return The account",
+            "id": 45,
+            "implemented": true,
+            "kind": "function",
+            "modifiers": [],
+            "name": "getAccount",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 36,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 35,
+                  "name": "accountAddress",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 45,
+                  "src": "1209:22:0",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 34,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1209:7:0",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                }
+              ],
+              "src": "1208:24:0"
+            },
+            "returnParameters": {
+              "id": 39,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 38,
+                  "name": "",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 45,
+                  "src": "1256:20:0",
+                  "stateVariable": false,
+                  "storageLocation": "memory",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_struct$_Account_$1030_memory_ptr",
+                    "typeString": "struct Types.Account"
+                  },
+                  "typeName": {
+                    "contractScope": null,
+                    "id": 37,
+                    "name": "Types.Account",
+                    "nodeType": "UserDefinedTypeName",
+                    "referencedDeclaration": 1030,
+                    "src": "1256:13:0",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_struct$_Account_$1030_storage_ptr",
+                      "typeString": "struct Types.Account"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                }
+              ],
+              "src": "1255:22:0"
+            },
+            "scope": 46,
+            "src": "1189:139:0",
+            "stateMutability": "view",
+            "superFunction": null,
+            "visibility": "external"
+          }
+        ],
+        "scope": 47,
+        "src": "260:1071:0"
+      }
+    ],
+    "src": "0:1629:0"
+  },
+  "compiler": {
+    "name": "solc",
+    "version": "0.5.12+commit.7709ece9.Emscripten.clang"
+  },
+  "networks": {
+    "5777": {
+      "events": {
+        "0xda56fc6c6a6aa5d3181a0ce4c71171978fdc9da71e311e8d7a51ae644a9a0edf": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": false,
+              "internalType": "address",
+              "name": "account",
+              "type": "address"
+            },
+            {
+              "indexed": false,
+              "internalType": "uint256",
+              "name": "amount",
+              "type": "uint256"
+            }
+          ],
+          "name": "AttoDaiSupplied",
+          "type": "event",
+          "signature": "0xda56fc6c6a6aa5d3181a0ce4c71171978fdc9da71e311e8d7a51ae644a9a0edf"
+        },
+        "0x3012c8e1ae798f433232d01d0349a38238de0e815a5659feb1f6d5fb9f175ba2": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": false,
+              "internalType": "address",
+              "name": "account",
+              "type": "address"
+            },
+            {
+              "indexed": false,
+              "internalType": "uint256",
+              "name": "amount",
+              "type": "uint256"
+            }
+          ],
+          "name": "WeiSupplied",
+          "type": "event",
+          "signature": "0x3012c8e1ae798f433232d01d0349a38238de0e815a5659feb1f6d5fb9f175ba2"
+        }
+      },
+      "links": {
+        "Errors": "0x6CDEc6957667a92871AF794b34E44f9fbfd58587"
+      },
+      "address": "0xB62d90703b759f30840c9D3E9144efCc31C83E4a",
+      "transactionHash": "0x52a25782366cb27581648bc4f9c312a92ee906314aecbcece95acd95bd10240c"
+    }
+  },
+  "schemaVersion": "3.0.17",
+  "updatedAt": "2019-11-11T00:36:37.832Z",
+  "devdoc": {
+    "author": "DaiFi",
+    "methods": {
+      "constructor": {
+        "params": {
+          "daiAddress": "The address of the Dai token"
+        }
+      },
+      "getAccount(address)": {
+        "params": {
+          "accountAddress": "The address of the account"
+        },
+        "return": "The account"
+      },
+      "getTotalAttoDai()": {
+        "return": "The total attoDai balances"
+      },
+      "getTotalWei()": {
+        "return": "The total Wei balances"
+      },
+      "supplyAttoDai(uint256)": {
+        "params": {
+          "amount": "The amount of attoDai to supply"
+        }
+      },
+      "withdrawAttoDai(uint256)": {
+        "params": {
+          "amount": "The amount of attoDai to withdraw"
+        }
+      },
+      "withdrawWei(uint256)": {
+        "params": {
+          "amount": "The amount of Wei to withdraw"
+        }
+      }
+    },
+    "title": "DaiFi Contract"
+  },
+  "userdoc": {
+    "methods": {
+      "constructor": "constructor sets the Dai contract address from the given address (public)",
+      "getAccount(address)": {
+        "notice": "Gets the account for the given address (external view)"
+      },
+      "getTotalAttoDai()": {
+        "notice": "Gets the balances of total attoDai (external view)"
+      },
+      "getTotalWei()": {
+        "notice": "Gets the balances of total Wei (external view)"
+      },
+      "supplyAttoDai(uint256)": {
+        "notice": "Supply attoDai from sender account (external nonReentrant)"
+      },
+      "supplyWei()": {
+        "notice": "Supply Wei from sender account (external payable nonReentrant)"
+      },
+      "withdrawAttoDai(uint256)": {
+        "notice": "Withdraw attoDai to sender account (external)"
+      },
+      "withdrawWei(uint256)": {
+        "notice": "Withdraw Wei to sender account (external)"
+      }
+    },
+    "notice": "The DaiFi main contract"
+  }
+}
