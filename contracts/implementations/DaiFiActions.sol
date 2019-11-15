@@ -1,6 +1,7 @@
 pragma solidity 0.5.12;
 
 import { IActions } from "../interfaces/IActions.sol";
+import { Collateral } from "../lib/Collateral.sol";
 import { ReentrancyGuard } from "../lib/ReentrancyGuard.sol";
 import { SafeMath } from "../lib/SafeMath.sol";
 import { Token } from "../lib/Token.sol";
@@ -48,8 +49,8 @@ contract DaiFiActions is IActions, ReentrancyGuard {
     function supplyWei() external payable nonReentrant {
         require(msg.value != 0, "supplied zero Wei");
 
-        accounts[msg.sender].wei_.supplied = accounts[msg.sender].wei_.supplied.add(msg.value);
         totalWei.supplied = totalWei.supplied.add(msg.value);
+        accounts[msg.sender].wei_.supplied = accounts[msg.sender].wei_.supplied.add(msg.value);
 
         emit WeiSupplied(msg.sender, msg.value);
     }
@@ -62,12 +63,11 @@ contract DaiFiActions is IActions, ReentrancyGuard {
         require(amount != 0, "withdrew zero Wei");
         require(amount <= accounts[msg.sender].wei_.supplied, "withdrew more Wei than supplied");
 
-        // TODO: check collateral whenever increase borrowing or lower supply!
+        totalWei.supplied = totalWei.supplied.sub(amount);
+        accounts[msg.sender].wei_.supplied = accounts[msg.sender].wei_.supplied.sub(amount);
+        require(Collateral.isCollateralisedForWei(accounts[msg.sender]), "not enough collateral");
 
         msg.sender.transfer(amount);
-
-        accounts[msg.sender].wei_.supplied = accounts[msg.sender].wei_.supplied.sub(amount);
-        totalWei.supplied = totalWei.supplied.sub(amount);
 
         emit WeiWithdrawn(msg.sender, amount);
     }
@@ -79,10 +79,10 @@ contract DaiFiActions is IActions, ReentrancyGuard {
     function supplyAttoDai(uint256 amount) external nonReentrant {
         require(amount != 0, "supplied zero attoDai");
 
-        require(Token.transferFrom(daiAddress, msg.sender, amount), "dai transfer failed");
-
-        accounts[msg.sender].attoDai.supplied = accounts[msg.sender].attoDai.supplied.add(amount);
         totalAttoDai.supplied = totalAttoDai.supplied.add(amount);
+        accounts[msg.sender].attoDai.supplied = accounts[msg.sender].attoDai.supplied.add(amount);
+
+        require(Token.transferFrom(daiAddress, msg.sender, amount), "dai transfer failed");
 
         emit AttoDaiSupplied(msg.sender, amount);
     }
@@ -95,12 +95,11 @@ contract DaiFiActions is IActions, ReentrancyGuard {
         require(amount != 0, "withdrew zero attoDai");
         require(amount <= accounts[msg.sender].attoDai.supplied, "withdrew more attoDai than supplied");
 
-        // TODO: check collateral whenever increase borrowing or lower supply!
+        totalAttoDai.supplied = totalAttoDai.supplied.sub(amount);
+        accounts[msg.sender].attoDai.supplied = accounts[msg.sender].attoDai.supplied.sub(amount);
+        require(Collateral.isCollateralisedForAttoDai(accounts[msg.sender]), "not enough collateral");
 
         require(Token.transferTo(daiAddress, msg.sender, amount), "dai transfer failed");
-
-        accounts[msg.sender].attoDai.supplied = accounts[msg.sender].attoDai.supplied.sub(amount);
-        totalAttoDai.supplied = totalAttoDai.supplied.sub(amount);
 
         emit AttoDaiWithdrawn(msg.sender, amount);
     }
@@ -112,12 +111,11 @@ contract DaiFiActions is IActions, ReentrancyGuard {
     function borrowWei(uint256 amount) external nonReentrant {
         require(amount != 0, "borrowed zero Wei");
 
-        // TODO: check collateral whenever increase borrowing or lower supply!
+        totalWei.borrowed = totalWei.borrowed.add(amount);
+        accounts[msg.sender].wei_.borrowed = accounts[msg.sender].wei_.borrowed.add(amount);
+        require(Collateral.isCollateralisedForWei(accounts[msg.sender]), "not enough collateral");
 
         msg.sender.transfer(amount);
-
-        accounts[msg.sender].wei_.borrowed = accounts[msg.sender].wei_.borrowed.add(amount);
-        totalWei.borrowed = totalWei.borrowed.add(amount);
 
         emit WeiBorrowed(msg.sender, amount);
     }
@@ -129,8 +127,8 @@ contract DaiFiActions is IActions, ReentrancyGuard {
         require(msg.value != 0, "repaid zero Wei");
         require(msg.value <= accounts[msg.sender].wei_.borrowed, "repaid more Wei than borrowed");
 
-        accounts[msg.sender].wei_.borrowed = accounts[msg.sender].wei_.borrowed.sub(msg.value);
         totalWei.borrowed = totalWei.borrowed.sub(msg.value);
+        accounts[msg.sender].wei_.borrowed = accounts[msg.sender].wei_.borrowed.sub(msg.value);
 
         emit WeiRepaid(msg.sender, msg.value);
     }
@@ -142,12 +140,11 @@ contract DaiFiActions is IActions, ReentrancyGuard {
     function borrowAttoDai(uint256 amount) external nonReentrant {
         require(amount != 0, "borrowed zero attoDai");
 
-        // TODO: check collateral whenever increase borrowing or lower supply!
+        totalAttoDai.borrowed = totalAttoDai.borrowed.add(amount);
+        accounts[msg.sender].attoDai.borrowed = accounts[msg.sender].attoDai.borrowed.add(amount);
+        require(Collateral.isCollateralisedForAttoDai(accounts[msg.sender]), "not enough collateral");
 
         require(Token.transferTo(daiAddress, msg.sender, amount), "dai transfer failed");
-
-        accounts[msg.sender].attoDai.borrowed = accounts[msg.sender].attoDai.borrowed.add(amount);
-        totalAttoDai.borrowed = totalAttoDai.borrowed.add(amount);
 
         emit AttoDaiBorrowed(msg.sender, amount);
     }
@@ -160,10 +157,10 @@ contract DaiFiActions is IActions, ReentrancyGuard {
         require(amount != 0, "repaid zero attoDai");
         require(amount <= accounts[msg.sender].attoDai.borrowed, "repaid more attoDai than borrowed");
 
-        require(Token.transferFrom(daiAddress, msg.sender, amount), "dai transfer failed");
-
-        accounts[msg.sender].attoDai.borrowed = accounts[msg.sender].attoDai.borrowed.sub(amount);
         totalAttoDai.borrowed = totalAttoDai.borrowed.sub(amount);
+        accounts[msg.sender].attoDai.borrowed = accounts[msg.sender].attoDai.borrowed.sub(amount);
+
+        require(Token.transferFrom(daiAddress, msg.sender, amount), "dai transfer failed");
 
         emit AttoDaiRepaid(msg.sender, amount);
     }

@@ -10,27 +10,29 @@ function assertRevert(actualError, expectedErrorMessage) {
 }
 
 async function deployNewDaiFi() {
-  return DaiFi.new("0x0000000000000000000000000000000000000000");
+  const mockDai = await MockDai.new();
+  const daiFi = await DaiFi.new(mockDai.address);
+  return {daiFi, mockDai};
 }
 
 async function deployNewDaiFiAndSupplyWei(amount) {
-  const daiFi = await deployNewDaiFi();
-  await daiFi.supplyWei({value: amount});
-  return daiFi;
+  const contracts = await deployNewDaiFi();
+  await contracts.daiFi.supplyWei({value: amount});
+  return contracts;
 }
 
-async function deployNewDaiFiAndSupplyAndBorrowWei(amount) {
-  const daiFi = await deployNewDaiFiAndSupplyWei(amount);
-  await daiFi.borrowWei(amount);
-  return daiFi;
+async function deployNewDaiFiAndSupplyAndBorrowWei(accounts, amount) {
+  const contracts = await deployNewDaiFiAndSupplyWei(amount);
+  await collateraliseWei(contracts, accounts, BigNumber(amount).plus("1"));
+  await contracts.daiFi.borrowWei(amount);
+  return contracts;
 }
 
 async function deployNewDaiFiAndApproveDai(accounts, amount) {
-  const mockDai = await MockDai.new();
-  await mockDai.mint(accounts[0], amount);
-  const daiFi = await DaiFi.new(mockDai.address);
-  await mockDai.approve(daiFi.address, amount);
-  return {daiFi, mockDai};
+  const contracts = await deployNewDaiFi();
+  await contracts.mockDai.mint(accounts[0], amount);
+  await contracts.mockDai.approve(contracts.daiFi.address, amount);
+  return contracts;
 }
 
 async function deployNewDaiFiAndApproveAndSupplyDai(accounts, amount) {
@@ -41,22 +43,33 @@ async function deployNewDaiFiAndApproveAndSupplyDai(accounts, amount) {
 
 async function deployNewDaiFiAndApproveAndSupplyAndBorrowDai(accounts, amount) {
   const contracts = await deployNewDaiFiAndApproveAndSupplyDai(accounts, amount);
+  await collateraliseAttoDai(contracts, accounts, BigNumber(amount).plus("1"));
   await contracts.daiFi.borrowAttoDai(amount);
   return contracts;
+}
+
+async function collateraliseWei(contracts, accounts, attoDaiAmount) {
+  await contracts.mockDai.mint(accounts[0], attoDaiAmount);
+  await contracts.mockDai.approve(contracts.daiFi.address, attoDaiAmount);
+  await contracts.daiFi.supplyAttoDai(attoDaiAmount);
+}
+
+async function collateraliseAttoDai(contracts, accounts, weiAmount) {
+  await contracts.daiFi.supplyWei({value: weiAmount});
 }
 
 contract("DaiFi", async accounts => {
 
   it("should initialise all supplied and borrowed balances as zero", async () => {
-    const daiFi = await deployNewDaiFi();
-    assert.equal((await daiFi.getTotalWei()).supplied, "0");
-    assert.equal((await daiFi.getTotalWei()).borrowed, "0");
-    assert.equal((await daiFi.getTotalAttoDai()).supplied, "0");
-    assert.equal((await daiFi.getTotalAttoDai()).borrowed, "0");
-    assert.equal((await daiFi.getAccount(accounts[0]))["wei_"].supplied, "0");
-    assert.equal((await daiFi.getAccount(accounts[0]))["wei_"].borrowed, "0");
-    assert.equal((await daiFi.getAccount(accounts[0]))["attoDai"].supplied, "0");
-    assert.equal((await daiFi.getAccount(accounts[0]))["attoDai"].borrowed, "0");
+    const contracts = await deployNewDaiFi();
+    assert.equal((await contracts.daiFi.getTotalWei()).supplied, "0");
+    assert.equal((await contracts.daiFi.getTotalWei()).borrowed, "0");
+    assert.equal((await contracts.daiFi.getTotalAttoDai()).supplied, "0");
+    assert.equal((await contracts.daiFi.getTotalAttoDai()).borrowed, "0");
+    assert.equal((await contracts.daiFi.getAccount(accounts[0]))["wei_"].supplied, "0");
+    assert.equal((await contracts.daiFi.getAccount(accounts[0]))["wei_"].borrowed, "0");
+    assert.equal((await contracts.daiFi.getAccount(accounts[0]))["attoDai"].supplied, "0");
+    assert.equal((await contracts.daiFi.getAccount(accounts[0]))["attoDai"].borrowed, "0");
   });
 
   it("should emit events for all actions", async () => {
@@ -66,11 +79,14 @@ contract("DaiFi", async accounts => {
     assert.equal((await contracts.daiFi.supplyAttoDai("1")).logs[0].event, "AttoDaiSupplied");
     assert.equal((await contracts.daiFi.withdrawAttoDai("1")).logs[0].event, "AttoDaiWithdrawn");
 
-    contracts = await deployNewDaiFiAndApproveAndSupplyDai(accounts, "1");
-    await contracts.mockDai.approve(contracts.daiFi.address, "1");
-    await contracts.daiFi.supplyWei({value: "1"});
+    contracts = await deployNewDaiFiAndSupplyWei("1");
+    await collateraliseWei(contracts, accounts, "2");
     assert.equal((await contracts.daiFi.borrowWei("1")).logs[0].event, "WeiBorrowed");
     assert.equal((await contracts.daiFi.repayWei({value: "1"})).logs[0].event, "WeiRepaid");
+
+    contracts = await deployNewDaiFiAndApproveAndSupplyDai(accounts, "1");
+    await contracts.mockDai.approve(contracts.daiFi.address, "1");
+    await collateraliseAttoDai(contracts, accounts, "2");
     assert.equal((await contracts.daiFi.borrowAttoDai("1")).logs[0].event, "AttoDaiBorrowed");
     assert.equal((await contracts.daiFi.repayAttoDai("1")).logs[0].event, "AttoDaiRepaid");
   });
@@ -78,9 +94,9 @@ contract("DaiFi", async accounts => {
 //================ SUPPLY WEI ================
 
   it("should fail when supplying 0 Wei", async () => {
-    const daiFi = await deployNewDaiFi();
+    const contracts = await deployNewDaiFi();
     try {
-      await daiFi.supplyWei();
+      await contracts.daiFi.supplyWei();
       throw null;
     } catch (error) {
       assertRevert(error, "supplied zero Wei");
@@ -88,35 +104,35 @@ contract("DaiFi", async accounts => {
   });
 
   it("should increase own wei balance when supplying Wei", async () => {
-    const daiFi = await deployNewDaiFiAndSupplyWei("1");
-    assert.equal(await web3.eth.getBalance(daiFi.address), "1");
-    await daiFi.supplyWei({value: "1000000000000000000"});
-    assert.equal(await web3.eth.getBalance(daiFi.address), "1000000000000000001");
+    const contracts = await deployNewDaiFiAndSupplyWei("1");
+    assert.equal(await web3.eth.getBalance(contracts.daiFi.address), "1");
+    await contracts.daiFi.supplyWei({value: "1000000000000000000"});
+    assert.equal(await web3.eth.getBalance(contracts.daiFi.address), "1000000000000000001");
   });
 
   it("should increase sender's Wei supply when supplying Wei", async () => {
-    const daiFi = await deployNewDaiFiAndSupplyWei("1");
-    assert.equal((await daiFi.getAccount(accounts[0]))["wei_"].supplied, "1");
-    assert.equal((await daiFi.getAccount(accounts[0]))["wei_"].borrowed, "0");
-    assert.equal((await daiFi.getAccount(accounts[0]))["attoDai"].supplied, "0");
-    assert.equal((await daiFi.getAccount(accounts[0]))["attoDai"].borrowed, "0");
-    await daiFi.supplyWei({value: "1000000000000000000"});
-    assert.equal((await daiFi.getAccount(accounts[0]))["wei_"].supplied, "1000000000000000001");
+    const contracts = await deployNewDaiFiAndSupplyWei("1");
+    assert.equal((await contracts.daiFi.getAccount(accounts[0]))["wei_"].supplied, "1");
+    assert.equal((await contracts.daiFi.getAccount(accounts[0]))["wei_"].borrowed, "0");
+    assert.equal((await contracts.daiFi.getAccount(accounts[0]))["attoDai"].supplied, "0");
+    assert.equal((await contracts.daiFi.getAccount(accounts[0]))["attoDai"].borrowed, "0");
+    await contracts.daiFi.supplyWei({value: "1000000000000000000"});
+    assert.equal((await contracts.daiFi.getAccount(accounts[0]))["wei_"].supplied, "1000000000000000001");
   });
 
   it("should increase total Wei supply when supplying Wei", async () => {
-    const daiFi = await deployNewDaiFiAndSupplyWei("1");
-    assert.equal((await daiFi.getTotalWei()).supplied, "1");
-    await daiFi.supplyWei({value: "1000000000000000000"});
-    assert.equal((await daiFi.getTotalWei()).supplied, "1000000000000000001");
+    const contracts = await deployNewDaiFiAndSupplyWei("1");
+    assert.equal((await contracts.daiFi.getTotalWei()).supplied, "1");
+    await contracts.daiFi.supplyWei({value: "1000000000000000000"});
+    assert.equal((await contracts.daiFi.getTotalWei()).supplied, "1000000000000000001");
   });
 
 //================ WITHDRAW WEI ================
 
   it("should fail when withdrawing 0 Wei", async () => {
-    const daiFi = await deployNewDaiFi();
+    const contracts = await deployNewDaiFi();
     try {
-      await daiFi.withdrawWei("0");
+      await contracts.daiFi.withdrawWei("0");
       throw null;
     } catch (error) {
       assertRevert(error, "withdrew zero Wei");
@@ -124,9 +140,9 @@ contract("DaiFi", async accounts => {
   });
 
   it("should fail when withdrawing more Wei than supplied", async () => {
-    const daiFi = await deployNewDaiFiAndSupplyWei("1");
+    const contracts = await deployNewDaiFiAndSupplyWei("1");
     try {
-      await daiFi.withdrawWei("2");
+      await contracts.daiFi.withdrawWei("2");
       throw null;
     } catch (error) {
       assertRevert(error, "withdrew more Wei than supplied");
@@ -134,39 +150,39 @@ contract("DaiFi", async accounts => {
   });
 
   it("should increase sender's wei balance when withdrawing Wei", async () => {
-    const daiFi = await deployNewDaiFiAndSupplyWei("1000000000000000001");
+    const contracts = await deployNewDaiFiAndSupplyWei("1000000000000000001");
     const initialBalance = BigNumber(await web3.eth.getBalance(accounts[0]));
-    await daiFi.withdrawWei("1", {gasPrice: "0"});
+    await contracts.daiFi.withdrawWei("1", {gasPrice: "0"});
     assert.equal(await web3.eth.getBalance(accounts[0]), initialBalance.plus("1"));
-    await daiFi.withdrawWei("1000000000000000000", {gasPrice: "0"});
+    await contracts.daiFi.withdrawWei("1000000000000000000", {gasPrice: "0"});
     assert.equal(await web3.eth.getBalance(accounts[0]), initialBalance.plus("1000000000000000001"));
   });
 
   it("should decrease sender's Wei supply when withdrawing Wei", async () => {
-    const daiFi = await deployNewDaiFiAndSupplyWei("1000000000000000001");
-    await daiFi.withdrawWei("1");
-    assert.equal((await daiFi.getAccount(accounts[0]))["wei_"].supplied, "1000000000000000000");
-    assert.equal((await daiFi.getAccount(accounts[0]))["wei_"].borrowed, "0");
-    assert.equal((await daiFi.getAccount(accounts[0]))["attoDai"].supplied, "0");
-    assert.equal((await daiFi.getAccount(accounts[0]))["attoDai"].borrowed, "0");
-    await daiFi.withdrawWei("1000000000000000000");
-    assert.equal((await daiFi.getAccount(accounts[0]))["wei_"].supplied, "0");
+    const contracts = await deployNewDaiFiAndSupplyWei("1000000000000000001");
+    await contracts.daiFi.withdrawWei("1");
+    assert.equal((await contracts.daiFi.getAccount(accounts[0]))["wei_"].supplied, "1000000000000000000");
+    assert.equal((await contracts.daiFi.getAccount(accounts[0]))["wei_"].borrowed, "0");
+    assert.equal((await contracts.daiFi.getAccount(accounts[0]))["attoDai"].supplied, "0");
+    assert.equal((await contracts.daiFi.getAccount(accounts[0]))["attoDai"].borrowed, "0");
+    await contracts.daiFi.withdrawWei("1000000000000000000");
+    assert.equal((await contracts.daiFi.getAccount(accounts[0]))["wei_"].supplied, "0");
   });
 
   it("should decrease total Wei supply when withdrawing Wei", async () => {
-    const daiFi = await deployNewDaiFiAndSupplyWei("1000000000000000001");
-    await daiFi.withdrawWei("1");
-    assert.equal((await daiFi.getTotalWei()).supplied, "1000000000000000000");
-    await daiFi.withdrawWei("1000000000000000000");
-    assert.equal((await daiFi.getTotalWei()).supplied, "0");
+    const contracts = await deployNewDaiFiAndSupplyWei("1000000000000000001");
+    await contracts.daiFi.withdrawWei("1");
+    assert.equal((await contracts.daiFi.getTotalWei()).supplied, "1000000000000000000");
+    await contracts.daiFi.withdrawWei("1000000000000000000");
+    assert.equal((await contracts.daiFi.getTotalWei()).supplied, "0");
   });
 
 //================ SUPPLY ATTODAI ================
 
   it("should fail when supplying 0 attoDai", async () => {
-    const daiFi = await deployNewDaiFi();
+    const contracts = await deployNewDaiFi();
     try {
-      await daiFi.supplyAttoDai("0");
+      await contracts.daiFi.supplyAttoDai("0");
       throw null;
     } catch (error) {
       assertRevert(error, "supplied zero attoDai");
@@ -174,12 +190,11 @@ contract("DaiFi", async accounts => {
   });
 
   it("should fail when supplying unapproved attoDai", async () => {
-    const mockDai = await MockDai.new();
-    await mockDai.mint(accounts[0], "2");
-    const daiFi = await DaiFi.new(mockDai.address);
-    await mockDai.approve(daiFi.address, "1");
+    const contracts = await deployNewDaiFi();
+    await contracts.mockDai.mint(accounts[0], "2");
+    await contracts.mockDai.approve(contracts.daiFi.address, "1");
     try {
-      await daiFi.supplyAttoDai("2");
+      await contracts.daiFi.supplyAttoDai("2");
       throw null;
     } catch (error) {
       assertRevert(error, "ERC20: transfer amount exceeds allowance");
@@ -216,9 +231,9 @@ contract("DaiFi", async accounts => {
 //================ WITHDRAW ATTODAI ================
 
   it("should fail when withdrawing 0 attoDai", async () => {
-    const daiFi = await deployNewDaiFi();
+    const contracts = await deployNewDaiFi();
     try {
-      await daiFi.withdrawAttoDai("0");
+      await contracts.daiFi.withdrawAttoDai("0");
       throw null;
     } catch (error) {
       assertRevert(error, "withdrew zero attoDai");
@@ -266,9 +281,10 @@ contract("DaiFi", async accounts => {
 //================ BORROW WEI ================
 
   it("should fail when borrowing 0 Wei", async () => {
-    const daiFi = await deployNewDaiFi();
+    const contracts = await deployNewDaiFi();
+    await collateraliseWei(contracts, accounts, "1");
     try {
-      await daiFi.borrowWei("0");
+      await contracts.daiFi.borrowWei("0");
       throw null;
     } catch (error) {
       assertRevert(error, "borrowed zero Wei");
@@ -276,39 +292,42 @@ contract("DaiFi", async accounts => {
   });
 
   it("should increase sender's wei balance when borrowing Wei", async () => {
-    const daiFi = await deployNewDaiFiAndSupplyWei("1000000000000000001");
+    const contracts = await deployNewDaiFiAndSupplyWei("1000000000000000001");
+    await collateraliseWei(contracts, accounts, "1000000000000000002");
     const initialBalance = BigNumber(await web3.eth.getBalance(accounts[0]));
-    await daiFi.borrowWei("1", {gasPrice: "0"});
+    await contracts.daiFi.borrowWei("1", {gasPrice: "0"});
     assert.equal(await web3.eth.getBalance(accounts[0]), initialBalance.plus("1"));
-    await daiFi.borrowWei("1000000000000000000", {gasPrice: "0"});
+    await contracts.daiFi.borrowWei("1000000000000000000", {gasPrice: "0"});
     assert.equal(await web3.eth.getBalance(accounts[0]), initialBalance.plus("1000000000000000001"));
   });
 
   it("should increase sender's borrowed Wei when borrowing Wei", async () => {
-    const daiFi = await deployNewDaiFiAndSupplyWei("1000000000000000001");
-    await daiFi.borrowWei("1");
-    assert.equal((await daiFi.getAccount(accounts[0]))["wei_"].supplied, "1000000000000000001");
-    assert.equal((await daiFi.getAccount(accounts[0]))["wei_"].borrowed, "1");
-    assert.equal((await daiFi.getAccount(accounts[0]))["attoDai"].supplied, "0");
-    assert.equal((await daiFi.getAccount(accounts[0]))["attoDai"].borrowed, "0");
-    await daiFi.borrowWei("1000000000000000000");
-    assert.equal((await daiFi.getAccount(accounts[0]))["wei_"].borrowed, "1000000000000000001");
+    const contracts = await deployNewDaiFiAndSupplyWei("1000000000000000001");
+    await collateraliseWei(contracts, accounts, "1000000000000000002");
+    await contracts.daiFi.borrowWei("1");
+    assert.equal((await contracts.daiFi.getAccount(accounts[0]))["wei_"].supplied, "1000000000000000001");
+    assert.equal((await contracts.daiFi.getAccount(accounts[0]))["wei_"].borrowed, "1");
+    assert.equal((await contracts.daiFi.getAccount(accounts[0]))["attoDai"].supplied, "1000000000000000002");
+    assert.equal((await contracts.daiFi.getAccount(accounts[0]))["attoDai"].borrowed, "0");
+    await contracts.daiFi.borrowWei("1000000000000000000");
+    assert.equal((await contracts.daiFi.getAccount(accounts[0]))["wei_"].borrowed, "1000000000000000001");
   });
 
   it("should increase total Wei supply when borrowing Wei", async () => {
-    const daiFi = await deployNewDaiFiAndSupplyWei("1000000000000000001");
-    await daiFi.borrowWei("1");
-    assert.equal((await daiFi.getTotalWei()).borrowed, "1");
-    await daiFi.borrowWei("1000000000000000000");
-    assert.equal((await daiFi.getTotalWei()).borrowed, "1000000000000000001");
+    const contracts = await deployNewDaiFiAndSupplyWei("1000000000000000001");
+    await collateraliseWei(contracts, accounts, "1000000000000000002");
+    await contracts.daiFi.borrowWei("1");
+    assert.equal((await contracts.daiFi.getTotalWei()).borrowed, "1");
+    await contracts.daiFi.borrowWei("1000000000000000000");
+    assert.equal((await contracts.daiFi.getTotalWei()).borrowed, "1000000000000000001");
   });
 
 //================ REPAY WEI ================
 
   it("should fail when repaying 0 Wei", async () => {
-    const daiFi = await deployNewDaiFi();
+    const contracts = await deployNewDaiFi();
     try {
-      await daiFi.repayWei();
+      await contracts.daiFi.repayWei();
       throw null;
     } catch (error) {
       assertRevert(error, "repaid zero Wei");
@@ -316,9 +335,9 @@ contract("DaiFi", async accounts => {
   });
 
   it("should fail when repaying more Wei than borrowed", async () => {
-    const daiFi = await deployNewDaiFiAndSupplyAndBorrowWei("1");
+    const contracts = await deployNewDaiFiAndSupplyAndBorrowWei(accounts, "1");
     try {
-      await daiFi.repayWei({value: "2"});
+      await contracts.daiFi.repayWei({value: "2"});
       throw null;
     } catch (error) {
       assertRevert(error, "repaid more Wei than borrowed");
@@ -326,39 +345,40 @@ contract("DaiFi", async accounts => {
   });
 
   it("should increase own wei balance when repaying Wei", async () => {
-    const daiFi = await deployNewDaiFiAndSupplyAndBorrowWei("1000000000000000001");
-    assert.equal(await web3.eth.getBalance(daiFi.address), "0");
-    await daiFi.repayWei({value: "1"});
-    assert.equal(await web3.eth.getBalance(daiFi.address), "1");
-    await daiFi.repayWei({value: "1000000000000000000"});
-    assert.equal(await web3.eth.getBalance(daiFi.address), "1000000000000000001");
+    const contracts = await deployNewDaiFiAndSupplyAndBorrowWei(accounts, "1000000000000000001");
+    assert.equal(await web3.eth.getBalance(contracts.daiFi.address), "0");
+    await contracts.daiFi.repayWei({value: "1"});
+    assert.equal(await web3.eth.getBalance(contracts.daiFi.address), "1");
+    await contracts.daiFi.repayWei({value: "1000000000000000000"});
+    assert.equal(await web3.eth.getBalance(contracts.daiFi.address), "1000000000000000001");
   });
 
   it("should decrease sender's borrowed Wei when repaying Wei", async () => {
-    const daiFi = await deployNewDaiFiAndSupplyAndBorrowWei("1000000000000000001");
-    await daiFi.repayWei({value: "1"});
-    assert.equal((await daiFi.getAccount(accounts[0]))["wei_"].supplied, "1000000000000000001");
-    assert.equal((await daiFi.getAccount(accounts[0]))["wei_"].borrowed, "1000000000000000000");
-    assert.equal((await daiFi.getAccount(accounts[0]))["attoDai"].supplied, "0");
-    assert.equal((await daiFi.getAccount(accounts[0]))["attoDai"].borrowed, "0");
-    await daiFi.repayWei({value: "1000000000000000000"});
-    assert.equal((await daiFi.getAccount(accounts[0]))["wei_"].borrowed, "0");
+    const contracts = await deployNewDaiFiAndSupplyAndBorrowWei(accounts, "1000000000000000001");
+    await contracts.daiFi.repayWei({value: "1"});
+    assert.equal((await contracts.daiFi.getAccount(accounts[0]))["wei_"].supplied, "1000000000000000001");
+    assert.equal((await contracts.daiFi.getAccount(accounts[0]))["wei_"].borrowed, "1000000000000000000");
+    assert.equal((await contracts.daiFi.getAccount(accounts[0]))["attoDai"].supplied, "1000000000000000002");
+    assert.equal((await contracts.daiFi.getAccount(accounts[0]))["attoDai"].borrowed, "0");
+    await contracts.daiFi.repayWei({value: "1000000000000000000"});
+    assert.equal((await contracts.daiFi.getAccount(accounts[0]))["wei_"].borrowed, "0");
   });
 
   it("should decrease total borrowed Wei when repaying Wei", async () => {
-    const daiFi = await deployNewDaiFiAndSupplyAndBorrowWei("1000000000000000001");
-    await daiFi.repayWei({value: "1"});
-    assert.equal((await daiFi.getTotalWei()).borrowed, "1000000000000000000");
-    await daiFi.repayWei({value: "1000000000000000000"});
-    assert.equal((await daiFi.getTotalWei()).borrowed, "0");
+    const contracts = await deployNewDaiFiAndSupplyAndBorrowWei(accounts, "1000000000000000001");
+    await contracts.daiFi.repayWei({value: "1"});
+    assert.equal((await contracts.daiFi.getTotalWei()).borrowed, "1000000000000000000");
+    await contracts.daiFi.repayWei({value: "1000000000000000000"});
+    assert.equal((await contracts.daiFi.getTotalWei()).borrowed, "0");
   });
 
 //================ BORROW ATTODAI ================
 
   it("should fail when borrowing 0 attoDai", async () => {
-    const daiFi = await deployNewDaiFi();
+    const contracts = await deployNewDaiFi();
+    await collateraliseAttoDai(contracts, accounts, "1");
     try {
-      await daiFi.borrowAttoDai("0");
+      await contracts.daiFi.borrowAttoDai("0");
       throw null;
     } catch (error) {
       assertRevert(error, "borrowed zero attoDai");
@@ -367,6 +387,7 @@ contract("DaiFi", async accounts => {
 
   it("should increase sender's attoDai balance when borrowing attoDai", async () => {
     const contracts = await deployNewDaiFiAndApproveAndSupplyDai(accounts, "1000000000000000001");
+    await collateraliseAttoDai(contracts, accounts, "1000000000000000002");
     assert.equal(await contracts.mockDai.balanceOf(accounts[0]), "0");
     await contracts.daiFi.borrowAttoDai("1");
     assert.equal(await contracts.mockDai.balanceOf(accounts[0]), "1");
@@ -376,8 +397,9 @@ contract("DaiFi", async accounts => {
 
   it("should increase sender's borrowed attoDai when borrowing attoDai", async () => {
     const contracts = await deployNewDaiFiAndApproveAndSupplyDai(accounts, "1000000000000000001");
+    await collateraliseAttoDai(contracts, accounts, "1000000000000000002");
     await contracts.daiFi.borrowAttoDai("1");
-    assert.equal((await contracts.daiFi.getAccount(accounts[0]))["wei_"].supplied, "0");
+    assert.equal((await contracts.daiFi.getAccount(accounts[0]))["wei_"].supplied, "1000000000000000002");
     assert.equal((await contracts.daiFi.getAccount(accounts[0]))["wei_"].borrowed, "0");
     assert.equal((await contracts.daiFi.getAccount(accounts[0]))["attoDai"].supplied, "1000000000000000001");
     assert.equal((await contracts.daiFi.getAccount(accounts[0]))["attoDai"].borrowed, "1");
@@ -387,6 +409,7 @@ contract("DaiFi", async accounts => {
 
   it("should increase total attoDai borrowed when borrowing attoDai", async () => {
     const contracts = await deployNewDaiFiAndApproveAndSupplyDai(accounts, "1000000000000000001");
+    await collateraliseAttoDai(contracts, accounts, "1000000000000000002");
     await contracts.daiFi.borrowAttoDai("1");
     assert.equal((await contracts.daiFi.getTotalAttoDai()).borrowed, "1");
     await contracts.daiFi.borrowAttoDai("1000000000000000000");
@@ -396,9 +419,9 @@ contract("DaiFi", async accounts => {
 //================ REPAY ATTODAI ================
 
   it("should fail when repaying 0 attoDai", async () => {
-    const daiFi = await deployNewDaiFi();
+    const contracts = await deployNewDaiFi();
     try {
-      await daiFi.repayAttoDai("0");
+      await contracts.daiFi.repayAttoDai("0");
       throw null;
     } catch (error) {
       assertRevert(error, "repaid zero attoDai");
@@ -442,7 +465,7 @@ contract("DaiFi", async accounts => {
     const contracts = await deployNewDaiFiAndApproveAndSupplyAndBorrowDai(accounts, "1000000000000000001");
     await contracts.mockDai.approve(contracts.daiFi.address, "1000000000000000001");
     await contracts.daiFi.repayAttoDai("1");
-    assert.equal((await contracts.daiFi.getAccount(accounts[0]))["wei_"].supplied, "0");
+    assert.equal((await contracts.daiFi.getAccount(accounts[0]))["wei_"].supplied, "1000000000000000002");
     assert.equal((await contracts.daiFi.getAccount(accounts[0]))["wei_"].borrowed, "0");
     assert.equal((await contracts.daiFi.getAccount(accounts[0]))["attoDai"].supplied, "1000000000000000001");
     assert.equal((await contracts.daiFi.getAccount(accounts[0]))["attoDai"].borrowed, "1000000000000000000");

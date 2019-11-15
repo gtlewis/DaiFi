@@ -43,7 +43,9 @@ contract DaiFi is DaiFiActions {
     }
 }
 
-// TODO: abstract supplying and borrowing across wei/dai?
-// TODO: collateral calculation.
-// TODO: abstracted interest rate model / price oracle / etc.
+// TODO: incorporate the collateral tests (use mock to test the Collateral library. Same for Token library)
+// TODO: prevent supply / borrow of same token at same time. Rework the supply/borrow test set-ups using collateralisation.
+// TODO: final collateral calculation with price feed
+// TODO: abstracted interest rate model / compounded interest
+// TODO: abstract supplying and borrowing across wei / dai?
 // TODO: add timelocked admin?
