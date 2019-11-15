@@ -43,7 +43,6 @@ contract DaiFi is DaiFiActions {
     }
 }
 
-// TODO: incorporate the collateral tests (use mock to test the Collateral library. Same for Token library)
 // TODO: prevent supply / borrow of same token at same time. Rework the supply/borrow test set-ups using collateralisation.
 // TODO: final collateral calculation with price feed
 // TODO: abstracted interest rate model / compounded interest

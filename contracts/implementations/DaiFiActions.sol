@@ -1,7 +1,8 @@
 pragma solidity 0.5.12;
+pragma experimental ABIEncoderV2;
 
 import { IActions } from "../interfaces/IActions.sol";
-import { Collateral } from "../lib/Collateral.sol";
+import { DaiFiCollateral } from "./DaiFiCollateral.sol";
 import { ReentrancyGuard } from "../lib/ReentrancyGuard.sol";
 import { SafeMath } from "../lib/SafeMath.sol";
 import { Token } from "../lib/Token.sol";
@@ -12,7 +13,7 @@ import { Types } from "../lib/Types.sol";
 * @notice Abstract contract for supported DaiFi actions
 * @author DaiFi
 */
-contract DaiFiActions is IActions, ReentrancyGuard {
+contract DaiFiActions is IActions, DaiFiCollateral, ReentrancyGuard {
     using SafeMath for uint256;
 
     /**
@@ -65,7 +66,7 @@ contract DaiFiActions is IActions, ReentrancyGuard {
 
         totalWei.supplied = totalWei.supplied.sub(amount);
         accounts[msg.sender].wei_.supplied = accounts[msg.sender].wei_.supplied.sub(amount);
-        require(Collateral.isCollateralisedForWei(accounts[msg.sender]), "not enough collateral");
+        require(isCollateralisedForWei(accounts[msg.sender]), "not enough collateral");
 
         msg.sender.transfer(amount);
 
@@ -97,7 +98,7 @@ contract DaiFiActions is IActions, ReentrancyGuard {
 
         totalAttoDai.supplied = totalAttoDai.supplied.sub(amount);
         accounts[msg.sender].attoDai.supplied = accounts[msg.sender].attoDai.supplied.sub(amount);
-        require(Collateral.isCollateralisedForAttoDai(accounts[msg.sender]), "not enough collateral");
+        require(isCollateralisedForAttoDai(accounts[msg.sender]), "not enough collateral");
 
         require(Token.transferTo(daiAddress, msg.sender, amount), "dai transfer failed");
 
@@ -113,7 +114,7 @@ contract DaiFiActions is IActions, ReentrancyGuard {
 
         totalWei.borrowed = totalWei.borrowed.add(amount);
         accounts[msg.sender].wei_.borrowed = accounts[msg.sender].wei_.borrowed.add(amount);
-        require(Collateral.isCollateralisedForWei(accounts[msg.sender]), "not enough collateral");
+        require(isCollateralisedForWei(accounts[msg.sender]), "not enough collateral");
 
         msg.sender.transfer(amount);
 
@@ -142,7 +143,7 @@ contract DaiFiActions is IActions, ReentrancyGuard {
 
         totalAttoDai.borrowed = totalAttoDai.borrowed.add(amount);
         accounts[msg.sender].attoDai.borrowed = accounts[msg.sender].attoDai.borrowed.add(amount);
-        require(Collateral.isCollateralisedForAttoDai(accounts[msg.sender]), "not enough collateral");
+        require(isCollateralisedForAttoDai(accounts[msg.sender]), "not enough collateral");
 
         require(Token.transferTo(daiAddress, msg.sender, amount), "dai transfer failed");
 
