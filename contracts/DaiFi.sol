@@ -43,7 +43,6 @@ contract DaiFi is DaiFiActions {
     }
 }
 
-// TODO: prevent supply / borrow of same token at same time. Rework the supply/borrow test set-ups using collateralisation.
 // TODO: final collateral calculation with price feed
 // TODO: abstracted interest rate model / compounded interest
 // TODO: abstract supplying and borrowing across wei / dai?

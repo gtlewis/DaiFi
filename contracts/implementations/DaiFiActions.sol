@@ -49,6 +49,7 @@ contract DaiFiActions is IActions, DaiFiCollateral, ReentrancyGuard {
     */
     function supplyWei() external payable nonReentrant {
         require(msg.value != 0, "supplied zero Wei");
+        require(accounts[msg.sender].wei_.borrowed == 0, "supplied Wei when already borrowing");
 
         totalWei.supplied = totalWei.supplied.add(msg.value);
         accounts[msg.sender].wei_.supplied = accounts[msg.sender].wei_.supplied.add(msg.value);
@@ -74,11 +75,42 @@ contract DaiFiActions is IActions, DaiFiCollateral, ReentrancyGuard {
     }
 
     /**
+    * @notice Borrow Wei to sender account (external nonReentrant)
+    * @param amount The amount of Wei to borrow
+    */
+    function borrowWei(uint256 amount) external nonReentrant {
+        require(amount != 0, "borrowed zero Wei");
+        require(accounts[msg.sender].wei_.supplied == 0, "borrowed Wei when already supplying");
+
+        totalWei.borrowed = totalWei.borrowed.add(amount);
+        accounts[msg.sender].wei_.borrowed = accounts[msg.sender].wei_.borrowed.add(amount);
+        require(isCollateralisedForWei(accounts[msg.sender]), "not enough collateral");
+
+        msg.sender.transfer(amount);
+
+        emit WeiBorrowed(msg.sender, amount);
+    }
+
+    /**
+    * @notice Repay Wei from sender account (external payable nonReentrant)
+    */
+    function repayWei() external payable nonReentrant {
+        require(msg.value != 0, "repaid zero Wei");
+        require(msg.value <= accounts[msg.sender].wei_.borrowed, "repaid more Wei than borrowed");
+
+        totalWei.borrowed = totalWei.borrowed.sub(msg.value);
+        accounts[msg.sender].wei_.borrowed = accounts[msg.sender].wei_.borrowed.sub(msg.value);
+
+        emit WeiRepaid(msg.sender, msg.value);
+    }
+
+    /**
     * @notice Supply attoDai from sender account (external nonReentrant)
     * @param amount The amount of attoDai to supply
     */
     function supplyAttoDai(uint256 amount) external nonReentrant {
         require(amount != 0, "supplied zero attoDai");
+        require(accounts[msg.sender].attoDai.borrowed == 0, "supplied attoDai when already borrowing");
 
         totalAttoDai.supplied = totalAttoDai.supplied.add(amount);
         accounts[msg.sender].attoDai.supplied = accounts[msg.sender].attoDai.supplied.add(amount);
@@ -106,40 +138,12 @@ contract DaiFiActions is IActions, DaiFiCollateral, ReentrancyGuard {
     }
 
     /**
-    * @notice Borrow Wei to sender account (external nonReentrant)
-    * @param amount The amount of Wei to borrow
-    */
-    function borrowWei(uint256 amount) external nonReentrant {
-        require(amount != 0, "borrowed zero Wei");
-
-        totalWei.borrowed = totalWei.borrowed.add(amount);
-        accounts[msg.sender].wei_.borrowed = accounts[msg.sender].wei_.borrowed.add(amount);
-        require(isCollateralisedForWei(accounts[msg.sender]), "not enough collateral");
-
-        msg.sender.transfer(amount);
-
-        emit WeiBorrowed(msg.sender, amount);
-    }
-
-    /**
-    * @notice Repay Wei from sender account (external payable nonReentrant)
-    */
-    function repayWei() external payable nonReentrant {
-        require(msg.value != 0, "repaid zero Wei");
-        require(msg.value <= accounts[msg.sender].wei_.borrowed, "repaid more Wei than borrowed");
-
-        totalWei.borrowed = totalWei.borrowed.sub(msg.value);
-        accounts[msg.sender].wei_.borrowed = accounts[msg.sender].wei_.borrowed.sub(msg.value);
-
-        emit WeiRepaid(msg.sender, msg.value);
-    }
-
-    /**
     * @notice Borrow attoDai to sender account (external nonReentrant)
     * @param amount The amount of attoDai to borrow
     */
     function borrowAttoDai(uint256 amount) external nonReentrant {
         require(amount != 0, "borrowed zero attoDai");
+        require(accounts[msg.sender].attoDai.supplied == 0, "borrowed attoDai when already supplying");
 
         totalAttoDai.borrowed = totalAttoDai.borrowed.add(amount);
         accounts[msg.sender].attoDai.borrowed = accounts[msg.sender].attoDai.borrowed.add(amount);

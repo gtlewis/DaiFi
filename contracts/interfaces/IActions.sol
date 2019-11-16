@@ -19,6 +19,17 @@ interface IActions {
     function withdrawWei(uint256 amount) external;
 
     /**
+    * @notice Borrow Wei to sender account (external)
+    * @param amount The amount of Wei to borrow
+    */
+    function borrowWei(uint256 amount) external;
+
+    /**
+    * @notice Repay Wei from sender account (external payable)
+    */
+    function repayWei() external payable;
+
+    /**
     * @notice Supply attoDai from sender account (external)
     * @param amount The amount of attoDai to supply
     */
@@ -29,17 +40,6 @@ interface IActions {
     * @param amount The amount of attoDai to withdraw
     */
     function withdrawAttoDai(uint256 amount) external;
-
-    /**
-    * @notice Borrow Wei to sender account (external)
-    * @param amount The amount of Wei to borrow
-    */
-    function borrowWei(uint256 amount) external;
-
-    /**
-    * @notice Repay Wei from sender account (external payable)
-    */
-    function repayWei() external payable;
 
     /**
     * @notice Borrow attoDai to sender account (external)
@@ -64,16 +64,6 @@ interface IActions {
     event WeiWithdrawn(address account, uint256 amount);
 
     /**
-     * @notice Event emitted when AttoDai supplied
-     */
-    event AttoDaiSupplied(address account, uint256 amount);
-
-    /**
-     * @notice Event emitted when AttoDai withdrawn
-     */
-    event AttoDaiWithdrawn(address account, uint256 amount);
-
-    /**
      * @notice Event emitted when Wei borrowed
      */
     event WeiBorrowed(address account, uint256 amount);
@@ -82,6 +72,16 @@ interface IActions {
      * @notice Event emitted when Wei repaid
      */
     event WeiRepaid(address account, uint256 amount);
+
+    /**
+     * @notice Event emitted when AttoDai supplied
+     */
+    event AttoDaiSupplied(address account, uint256 amount);
+
+    /**
+     * @notice Event emitted when AttoDai withdrawn
+     */
+    event AttoDaiWithdrawn(address account, uint256 amount);
 
     /**
      * @notice Event emitted when attoDai borrowed
