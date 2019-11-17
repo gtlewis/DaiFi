@@ -1,18 +1,21 @@
 const DaiFi = artifacts.require("DaiFi");
 
 contract("DaiFi", async accounts => {
-
+// TODO: test edge cases - 0, 1 and MAX
   it("should determine collateralised for Wei when more attoDai is supplied", async () => {
     const daiFi = await DaiFi.deployed();
     const account = {wei_: {supplied: 0, borrowed: 0}, attoDai:{supplied: 0, borrowed: 0}};
     assert.equal(await daiFi.isCollateralisedForWei(account), true);
     account["attoDai"].supplied = 1;
     assert.equal(await daiFi.isCollateralisedForWei(account), true);
-    account["attoDai"].supplied = 2;
+    account["attoDai"].supplied = 400;
     account["wei_"].borrowed = 1;
     assert.equal(await daiFi.isCollateralisedForWei(account), true);
+    account["attoDai"].supplied = 30200;
+    account["wei_"].borrowed = 100;
+    assert.equal(await daiFi.isCollateralisedForWei(account), true);
   });
-
+*/
   it("should determine not collateralised for Wei when less or equal attoDai is supplied", async () => {
     const daiFi = await DaiFi.deployed();
     const account = {wei_: {supplied: 0, borrowed: 0}, attoDai:{supplied: 0, borrowed: 0}};
@@ -73,5 +76,5 @@ contract("DaiFi", async accounts => {
     account = {wei_: {supplied: 0, borrowed: 1}, attoDai:{supplied: 2, borrowed: 0}};
     assert.equal(await daiFi.canBeLiquidated(account), false);
   });
-
+*/
 });

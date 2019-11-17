@@ -43,7 +43,8 @@ contract DaiFi is DaiFiActions {
     }
 }
 
-// TODO: final collateral calculation with price feed
 // TODO: abstracted interest rate model / compounded interest
 // TODO: abstract supplying and borrowing across wei / dai?
+// TODO: real price feed
+// TODO: liquidisation
 // TODO: add timelocked admin?
