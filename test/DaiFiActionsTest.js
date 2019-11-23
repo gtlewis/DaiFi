@@ -3,6 +3,8 @@ const DaiFi = artifacts.require("DaiFi");
 
 const BigNumber = require('bignumber.js');
 
+const WEI_ATTODAI_PRICE = "200";
+
 function assertRevert(actualError, expectedErrorMessage) {
   assert(actualError, "No revert error");
   assert(actualError.message.startsWith("Returned error: VM Exception while processing transaction: revert " + expectedErrorMessage),
@@ -41,7 +43,7 @@ async function transferWei(contracts, accounts, amount) {
 }
 
 async function collateraliseWei(contracts, accounts, amount) {
-  const attoDaiAmount = BigNumber(amount).plus("1");
+  const attoDaiAmount = BigNumber(amount).times("1.5").plus("1").times(WEI_ATTODAI_PRICE).toFixed(0);
   await contracts.mockDai.mint(accounts[0], attoDaiAmount);
   await contracts.mockDai.approve(contracts.daiFi.address, attoDaiAmount);
   await contracts.daiFi.supplyAttoDai(attoDaiAmount);
@@ -88,7 +90,7 @@ async function transferAttoDai(contracts, accounts, amount) {
 }
 
 async function collateraliseAttoDai(contracts, accounts, amount) {
-  const weiAmount = BigNumber(amount).plus("1");
+  const weiAmount = BigNumber(amount).times("1.5").dividedBy(WEI_ATTODAI_PRICE).plus("1").toFixed(0);
   await contracts.daiFi.supplyWei({value: weiAmount});
 }
 
@@ -239,7 +241,7 @@ contract("DaiFi", async accounts => {
     await contracts.daiFi.borrowWei("1");
     assert.equal((await contracts.daiFi.getAccount(accounts[0]))["wei_"].supplied, "0");
     assert.equal((await contracts.daiFi.getAccount(accounts[0]))["wei_"].borrowed, "1");
-    assert.equal((await contracts.daiFi.getAccount(accounts[0]))["attoDai"].supplied, "1000000000000000002");
+    assert.equal((await contracts.daiFi.getAccount(accounts[0]))["attoDai"].supplied, BigNumber("1500000000000000002.5").times(WEI_ATTODAI_PRICE));
     assert.equal((await contracts.daiFi.getAccount(accounts[0]))["attoDai"].borrowed, "0");
     await contracts.daiFi.borrowWei("1000000000000000000");
     assert.equal((await contracts.daiFi.getAccount(accounts[0]))["wei_"].borrowed, "1000000000000000001");
@@ -289,7 +291,7 @@ contract("DaiFi", async accounts => {
     await contracts.daiFi.repayWei({value: "1"});
     assert.equal((await contracts.daiFi.getAccount(accounts[0]))["wei_"].supplied, "0");
     assert.equal((await contracts.daiFi.getAccount(accounts[0]))["wei_"].borrowed, "1000000000000000000");
-    assert.equal((await contracts.daiFi.getAccount(accounts[0]))["attoDai"].supplied, "1000000000000000002");
+    assert.equal((await contracts.daiFi.getAccount(accounts[0]))["attoDai"].supplied, BigNumber("1500000000000000002.5").times(WEI_ATTODAI_PRICE));
     assert.equal((await contracts.daiFi.getAccount(accounts[0]))["attoDai"].borrowed, "0");
     await contracts.daiFi.repayWei({value: "1000000000000000000"});
     assert.equal((await contracts.daiFi.getAccount(accounts[0]))["wei_"].borrowed, "0");
@@ -428,7 +430,7 @@ contract("DaiFi", async accounts => {
   it("should increase sender's borrowed attoDai when borrowing attoDai", async () => {
     const contracts = await deployNewDaiFiAndTransferAndCollateraliseAttoDai(accounts, "1000000000000000001");
     await contracts.daiFi.borrowAttoDai("1");
-    assert.equal((await contracts.daiFi.getAccount(accounts[0]))["wei_"].supplied, "1000000000000000002");
+    assert.equal((await contracts.daiFi.getAccount(accounts[0]))["wei_"].supplied, BigNumber("1500000000000000200").dividedBy(WEI_ATTODAI_PRICE));
     assert.equal((await contracts.daiFi.getAccount(accounts[0]))["wei_"].borrowed, "0");
     assert.equal((await contracts.daiFi.getAccount(accounts[0]))["attoDai"].supplied, "0");
     assert.equal((await contracts.daiFi.getAccount(accounts[0]))["attoDai"].borrowed, "1");
@@ -491,7 +493,7 @@ contract("DaiFi", async accounts => {
   it("should decrease sender's borrowed attoDai when repaying attoDai", async () => {
     const contracts = await deployNewDaiFiAndTransferAndCollateraliseAndBorrowAndApproveAttoDai(accounts, "1000000000000000001");
     await contracts.daiFi.repayAttoDai("1");
-    assert.equal((await contracts.daiFi.getAccount(accounts[0]))["wei_"].supplied, "1000000000000000002");
+    assert.equal((await contracts.daiFi.getAccount(accounts[0]))["wei_"].supplied, BigNumber("1500000000000000200").dividedBy(WEI_ATTODAI_PRICE));
     assert.equal((await contracts.daiFi.getAccount(accounts[0]))["wei_"].borrowed, "0");
     assert.equal((await contracts.daiFi.getAccount(accounts[0]))["attoDai"].supplied, "0");
     assert.equal((await contracts.daiFi.getAccount(accounts[0]))["attoDai"].borrowed, "1000000000000000000");
