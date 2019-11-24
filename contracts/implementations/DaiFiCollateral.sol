@@ -44,35 +44,36 @@ contract DaiFiCollateral is ICollateral, WeiAttoDaiPriceFeed {
 
     /**
      * @notice internal constructor to make abstract (internal)
+     * @param daiPriceOracle The address of the Dai price oracle
      */
-    constructor() internal {}
+    constructor(address daiPriceOracle) WeiAttoDaiPriceFeed(daiPriceOracle) internal {}
 
     /**
-    * @notice Determine if the given account has sufficient collateral for amount of Wei borrowed (public pure)
+    * @notice Determine if the given account has sufficient collateral for amount of Wei borrowed (public view)
     * @param account The account to check
     * @return True if sufficiently collateralised
     */
-    function isCollateralisedForWei(Types.Account memory account) public pure returns (bool) {
+    function isCollateralisedForWei(Types.Account memory account) public view returns (bool) {
         return account.wei_.borrowed == 0 ||
             applyCollateralisationRatio(account.wei_.borrowed) < getLatestBasePrice(account.attoDai.supplied);
     }
 
     /**
-    * @notice Determine if the given account has sufficient collateral for amount of attoDai borrowed (public pure)
+    * @notice Determine if the given account has sufficient collateral for amount of attoDai borrowed (public view)
     * @param account The account to check
     * @return True if sufficiently collateralised
     */
-    function isCollateralisedForAttoDai(Types.Account memory account) public pure returns (bool) {
+    function isCollateralisedForAttoDai(Types.Account memory account) public view returns (bool) {
         return account.attoDai.borrowed == 0 ||
             applyCollateralisationRatio(account.attoDai.borrowed) < getLatestQuotePrice(account.wei_.supplied);
     }
 
     /**
-    * @notice Determine if the given account is insufficiently collateralised and can be liquidated (public pure)
+    * @notice Determine if the given account is insufficiently collateralised and can be liquidated (public view)
     * @param account The account to check
     * @return True if can be liquidated
     */
-    function canBeLiquidated(Types.Account memory account) public pure returns (bool) {
+    function canBeLiquidated(Types.Account memory account) public view returns (bool) {
         return getLatestBasePrice(account.attoDai.supplied) < applyLiquidisationRatio(account.wei_.borrowed) ||
             getLatestQuotePrice(account.wei_.supplied) < applyLiquidisationRatio(account.attoDai.borrowed);
     }

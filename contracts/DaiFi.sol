@@ -12,10 +12,11 @@ import { Types } from "./lib/Types.sol";
 contract DaiFi is DaiFiActions {
 
     /**
-     * @notice constructor sets the Dai contract address from the given address (public)
+     * @notice constructor sets the Dai contract address and the Dai price oracle from the given addresses (public)
      * @param daiAddress The address of the Dai token
+     * @param daiPriceOracle The address of the Dai price oracle
      */
-    constructor(address daiAddress) DaiFiActions(daiAddress) public {}
+    constructor(address daiAddress, address daiPriceOracle) DaiFiActions(daiAddress, daiPriceOracle) public {}
 
     /**
      * @notice Gets the balances of total Wei (external view)
@@ -45,6 +46,5 @@ contract DaiFi is DaiFiActions {
 
 // TODO: abstracted interest rate model / compounded interest
 // TODO: abstract supplying and borrowing across wei / dai?
-// TODO: real price feed
 // TODO: liquidisation
 // TODO: add timelocked admin?

@@ -8,18 +8,18 @@ pragma solidity 0.5.12;
 interface IPriceFeed {
 
     /**
-    * @notice Returns the latest price from the feed of the quote token for the given amount of the base token (external pure)
+    * @notice Returns the latest price from the feed of the quote token for the given amount of the base token (external view)
     * @dev implementations should revert if the price can not be retrieved
     * @param amount The amount of the base token
     * @return The latest quote price
     */
-    function getLatestQuotePrice(uint256 amount) external pure returns (uint256);
+    function getLatestQuotePrice(uint256 amount) external view returns (uint256);
 
     /**
-    * @notice Returns the latest price from the feed of the base token for the given amount of the quote token (external pure)
+    * @notice Returns the latest price from the feed of the base token for the given amount of the quote token (external view)
     * @dev implementations should revert if the price can not be retrieved
     * @param amount The amount of the quote token
     * @return The latest base price
     */
-    function getLatestBasePrice(uint256 amount) external pure returns (uint256);
+    function getLatestBasePrice(uint256 amount) external view returns (uint256);
 }

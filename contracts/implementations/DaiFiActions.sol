@@ -17,9 +17,9 @@ contract DaiFiActions is IActions, DaiFiCollateral, ReentrancyGuard {
     using SafeMath for uint256;
 
     /**
-    * @notice The Dai contract address (internal)
+    * @notice The Dai contract address (private)
     */
-    address internal daiAddress;
+    address private daiAddress;
 
     /**
     * @notice The total Wei balances (internal)
@@ -39,8 +39,9 @@ contract DaiFiActions is IActions, DaiFiCollateral, ReentrancyGuard {
     /**
      * @notice constructor sets the Dai contract address from the given address (internal)
      * @param daiAddress_ The address of the Dai token
+     * @param daiPriceOracle The address of the Dai price oracle
      */
-    constructor(address daiAddress_) internal {
+    constructor(address daiAddress_, address daiPriceOracle) DaiFiCollateral(daiPriceOracle) internal {
         daiAddress = daiAddress_;
     }
 
