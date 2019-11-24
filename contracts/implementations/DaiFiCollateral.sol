@@ -53,8 +53,8 @@ contract DaiFiCollateral is ICollateral, WeiAttoDaiPriceFeed {
     * @return True if sufficiently collateralised
     */
     function isCollateralisedForWei(Types.Account memory account) public pure returns (bool) {
-        uint256 weiCollateral = account.attoDai.supplied.div(getLatestPrice());
-        return account.wei_.borrowed == 0 || applyCollateralisationRatio(account.wei_.borrowed) < weiCollateral;
+        return account.wei_.borrowed == 0 ||
+            applyCollateralisationRatio(account.wei_.borrowed) < getLatestBasePrice(account.attoDai.supplied);
     }
 
     /**
@@ -63,8 +63,8 @@ contract DaiFiCollateral is ICollateral, WeiAttoDaiPriceFeed {
     * @return True if sufficiently collateralised
     */
     function isCollateralisedForAttoDai(Types.Account memory account) public pure returns (bool) {
-        uint256 attoDaiCollateral = account.wei_.supplied.mul(getLatestPrice());
-        return account.attoDai.borrowed == 0 || applyCollateralisationRatio(account.attoDai.borrowed) < attoDaiCollateral;
+        return account.attoDai.borrowed == 0 ||
+            applyCollateralisationRatio(account.attoDai.borrowed) < getLatestQuotePrice(account.wei_.supplied);
     }
 
     /**
@@ -73,8 +73,7 @@ contract DaiFiCollateral is ICollateral, WeiAttoDaiPriceFeed {
     * @return True if can be liquidated
     */
     function canBeLiquidated(Types.Account memory account) public pure returns (bool) {
-        uint256 weiCollateral = account.attoDai.supplied.div(getLatestPrice());
-        uint256 attoDaiCollateral = account.wei_.supplied.mul(getLatestPrice());
-        return weiCollateral < applyLiquidisationRatio(account.wei_.borrowed) || attoDaiCollateral < applyLiquidisationRatio(account.attoDai.borrowed);
+        return getLatestBasePrice(account.attoDai.supplied) < applyLiquidisationRatio(account.wei_.borrowed) ||
+            getLatestQuotePrice(account.wei_.supplied) < applyLiquidisationRatio(account.attoDai.borrowed);
     }
 }

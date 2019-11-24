@@ -1,15 +1,10 @@
 const DaiFi = artifacts.require("DaiFi");
 
 const BigNumber = require('bignumber.js');
+BigNumber.set({ROUNDING_MODE: 1});
 
-const WEI_ATTODAI_PRICE = "200";
+const WEI_ATTODAI_PRICE = "234.567890123456789012";
 const MAX_UINT256 = "115792089237316195423570985008687907853269984665640564039457584007913129639935";
-
-function assertRevert(actualError, expectedErrorMessage) {
-  assert(actualError, "No revert error");
-  assert(actualError.message.startsWith("Returned error: VM Exception while processing transaction: revert " + expectedErrorMessage),
-    "Expected '" + actualError.message + "' to contain '" + expectedErrorMessage + "'");
-}
 
 contract("DaiFi", async accounts => {
 
@@ -19,25 +14,20 @@ contract("DaiFi", async accounts => {
     assert.equal(await daiFi.isCollateralisedForWei(account), true);
     account["wei_"].borrowed = "1";
     assert.equal(await daiFi.isCollateralisedForWei(account), false);
-    let minimumSupply = BigNumber("1").plus("1").times(WEI_ATTODAI_PRICE);
-    account["attoDai"].supplied = minimumSupply.minus("1").toFixed();
+    let minimumSupply = BigNumber(account["wei_"].borrowed).times("2").times(WEI_ATTODAI_PRICE).plus("1").toFixed(0);
+    account["attoDai"].supplied = BigNumber(minimumSupply).minus("1").toFixed();
     assert.equal(await daiFi.isCollateralisedForWei(account), false);
-    account["attoDai"].supplied = minimumSupply.toFixed();
+    account["attoDai"].supplied = minimumSupply;
     assert.equal(await daiFi.isCollateralisedForWei(account), true);
     account["wei_"].borrowed = "1000000000000000000";
     assert.equal(await daiFi.isCollateralisedForWei(account), false);
-    minimumSupply = BigNumber("1500000000000000000").plus("1").times(WEI_ATTODAI_PRICE);
-    account["attoDai"].supplied = minimumSupply.minus("1").toFixed();
+    minimumSupply = BigNumber(account["wei_"].borrowed).times("1.5").plus("1").times(WEI_ATTODAI_PRICE).plus("1").toFixed(0);
+    account["attoDai"].supplied = BigNumber(minimumSupply).minus("1").toFixed();
     assert.equal(await daiFi.isCollateralisedForWei(account), false);
-    account["attoDai"].supplied = minimumSupply.toFixed();
+    account["attoDai"].supplied = minimumSupply;
     assert.equal(await daiFi.isCollateralisedForWei(account), true);
     account["wei_"].borrowed = MAX_UINT256;
-    try {
-      await daiFi.isCollateralisedForWei(account);
-      throw null;
-    } catch (error) {
-      assertRevert(error, "SafeMath: multiplication overflow");
-    }
+    assert.equal(await daiFi.isCollateralisedForWei(account), false);
     account["wei_"].borrowed = "1";
     account["attoDai"].supplied = MAX_UINT256;
     assert.equal(await daiFi.isCollateralisedForWei(account), true);
@@ -49,33 +39,23 @@ contract("DaiFi", async accounts => {
     assert.equal(await daiFi.isCollateralisedForAttoDai(account), true);
     account["attoDai"].borrowed = "1";
     assert.equal(await daiFi.isCollateralisedForAttoDai(account), false);
-    let minimumSupply = BigNumber("200").dividedBy(WEI_ATTODAI_PRICE);
-    account["wei_"].supplied = minimumSupply.minus("1").toFixed();
+    let minimumSupply = BigNumber(account["attoDai"].borrowed).toFixed(0);
+    account["wei_"].supplied = BigNumber(minimumSupply).minus("1").toFixed();
     assert.equal(await daiFi.isCollateralisedForAttoDai(account), false);
-    account["wei_"].supplied = minimumSupply.toFixed();
+    account["wei_"].supplied = minimumSupply;
     assert.equal(await daiFi.isCollateralisedForAttoDai(account), true);
     account["attoDai"].borrowed = "1000000000000000000";
     assert.equal(await daiFi.isCollateralisedForAttoDai(account), false);
-    minimumSupply = BigNumber("1500000000000000000").dividedBy(WEI_ATTODAI_PRICE).plus("1");
-    account["wei_"].supplied = minimumSupply.minus("1").toFixed();
+    minimumSupply = BigNumber(account["attoDai"].borrowed).times("1.5").dividedBy(WEI_ATTODAI_PRICE).plus("1").toFixed(0);
+    account["wei_"].supplied = BigNumber(minimumSupply).minus("1").toFixed();
     assert.equal(await daiFi.isCollateralisedForAttoDai(account), false);
-    account["wei_"].supplied = minimumSupply.toFixed();
+    account["wei_"].supplied = minimumSupply;
     assert.equal(await daiFi.isCollateralisedForAttoDai(account), true);
     account["attoDai"].borrowed = MAX_UINT256;
-    try {
-      await daiFi.isCollateralisedForAttoDai(account);
-      throw null;
-    } catch (error) {
-      assertRevert(error, "SafeMath: multiplication overflow");
-    }
+    assert.equal(await daiFi.isCollateralisedForAttoDai(account), false);
     account["attoDai"].borrowed = "1";
     account["wei_"].supplied = MAX_UINT256;
-    try {
-      await daiFi.isCollateralisedForAttoDai(account);
-      throw null;
-    } catch (error) {
-      assertRevert(error, "SafeMath: multiplication overflow");
-    }
+    assert.equal(await daiFi.isCollateralisedForAttoDai(account), true);
   });
 
   it("should determine can be liquidated if wei borrowed and insufficient attoDai supplied", async () => {
@@ -84,17 +64,17 @@ contract("DaiFi", async accounts => {
     assert.equal(await daiFi.canBeLiquidated(account), false);
     account["wei_"].borrowed = "1";
     assert.equal(await daiFi.canBeLiquidated(account), true);
-    let minimumSupply = BigNumber("1").times(WEI_ATTODAI_PRICE);
-    account["attoDai"].supplied = minimumSupply.minus("1").toFixed();
+    let minimumSupply = BigNumber(account["wei_"].borrowed).times(WEI_ATTODAI_PRICE).plus("1").toFixed(0);
+    account["attoDai"].supplied = BigNumber(minimumSupply).minus("1").toFixed();
     assert.equal(await daiFi.canBeLiquidated(account), true);
-    account["attoDai"].supplied = minimumSupply.toFixed();
+    account["attoDai"].supplied = minimumSupply;
     assert.equal(await daiFi.canBeLiquidated(account), false);
     account["wei_"].borrowed = "1000000000000000000";
     assert.equal(await daiFi.canBeLiquidated(account), true);
-    minimumSupply = BigNumber("1250000000000000000").times(WEI_ATTODAI_PRICE);
-    account["attoDai"].supplied = minimumSupply.minus("1").toFixed();
+    minimumSupply = BigNumber(account["wei_"].borrowed).times("1.25").times(WEI_ATTODAI_PRICE).toFixed(0);
+    account["attoDai"].supplied = BigNumber(minimumSupply).minus("1").toFixed();
     assert.equal(await daiFi.canBeLiquidated(account), true);
-    account["attoDai"].supplied = minimumSupply.toFixed();
+    account["attoDai"].supplied = minimumSupply;
     assert.equal(await daiFi.canBeLiquidated(account), false);
     account["wei_"].borrowed = MAX_UINT256;
     assert.equal(await daiFi.canBeLiquidated(account), true);
@@ -109,28 +89,23 @@ contract("DaiFi", async accounts => {
     assert.equal(await daiFi.canBeLiquidated(account), false);
     account["attoDai"].borrowed = "1";
     assert.equal(await daiFi.canBeLiquidated(account), true);
-    let minimumSupply = BigNumber("200").dividedBy(WEI_ATTODAI_PRICE);
-    account["wei_"].supplied = minimumSupply.minus("1").toFixed();
+    let minimumSupply = BigNumber(account["attoDai"].borrowed).toFixed(0);
+    account["wei_"].supplied = BigNumber(minimumSupply).minus("1").toFixed();
     assert.equal(await daiFi.canBeLiquidated(account), true);
-    account["wei_"].supplied = minimumSupply.toFixed();
+    account["wei_"].supplied = minimumSupply;
     assert.equal(await daiFi.canBeLiquidated(account), false);
     account["attoDai"].borrowed = "1000000000000000000";
     assert.equal(await daiFi.canBeLiquidated(account), true);
-    minimumSupply = BigNumber("1250000000000000000").dividedBy(WEI_ATTODAI_PRICE);
-    account["wei_"].supplied = minimumSupply.minus("1").toFixed();
+    minimumSupply = BigNumber(account["attoDai"].borrowed).times("1.25").dividedBy(WEI_ATTODAI_PRICE).plus("1").toFixed(0);
+    account["wei_"].supplied = BigNumber(minimumSupply).minus("1").toFixed();
     assert.equal(await daiFi.canBeLiquidated(account), true);
-    account["wei_"].supplied = minimumSupply.toFixed();
+    account["wei_"].supplied = minimumSupply;
     assert.equal(await daiFi.canBeLiquidated(account), false);
     account["attoDai"].borrowed = MAX_UINT256;
     assert.equal(await daiFi.canBeLiquidated(account), true);
     account["attoDai"].borrowed = "1";
     account["wei_"].supplied = MAX_UINT256;
-    try {
-      await daiFi.canBeLiquidated(account);
-      throw null;
-    } catch (error) {
-      assertRevert(error, "SafeMath: multiplication overflow");
-    }
+    assert.equal(await daiFi.canBeLiquidated(account), false);
   });
 
 });
