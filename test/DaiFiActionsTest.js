@@ -1,16 +1,12 @@
 const MockDai = artifacts.require("MockERC20");
 const DaiFi = artifacts.require("DaiFi");
 
+const truffleAssert = require('truffle-assertions');
+
 const BigNumber = require('bignumber.js');
 BigNumber.set({ROUNDING_MODE: 1});
 
 const WEI_ATTODAI_PRICE = "234.567890123456789012";
-
-function assertRevert(actualError, expectedErrorMessage) {
-  assert(actualError, "No revert error");
-  assert(actualError.message.startsWith("Returned error: VM Exception while processing transaction: revert " + expectedErrorMessage),
-    "Expected '" + actualError.message + "' to contain '" + expectedErrorMessage + "'");
-}
 
 async function deployNewDaiFi() {
   const mockDai = await MockDai.new();
@@ -116,30 +112,25 @@ contract("DaiFi", async accounts => {
     let contracts = await deployNewDaiFi();
     await transferWei(contracts, accounts, "1");
     await collateraliseWei(contracts, accounts, "1");
-    assert.equal((await contracts.daiFi.supplyWei({value: "1"})).logs[0].event, "WeiSupplied");
-    assert.equal((await contracts.daiFi.withdrawWei("1")).logs[0].event, "WeiWithdrawn");
-    assert.equal((await contracts.daiFi.borrowWei("1")).logs[0].event, "WeiBorrowed");
-    assert.equal((await contracts.daiFi.repayWei({value: "1"})).logs[0].event, "WeiRepaid");
+    truffleAssert.eventEmitted(await contracts.daiFi.supplyWei({value: "1"}), "WeiSupplied");
+    truffleAssert.eventEmitted(await contracts.daiFi.withdrawWei("1"), "WeiWithdrawn");
+    truffleAssert.eventEmitted(await contracts.daiFi.borrowWei("1"), "WeiBorrowed");
+    truffleAssert.eventEmitted(await contracts.daiFi.repayWei({value: "1"}), "WeiRepaid");
 
     contracts = await deployNewDaiFiAndApproveAttoDai(accounts, "2");
     await transferAttoDai(contracts, accounts, "1");
     await collateraliseAttoDai(contracts, accounts, "1");
-    assert.equal((await contracts.daiFi.supplyAttoDai("1")).logs[0].event, "AttoDaiSupplied");
-    assert.equal((await contracts.daiFi.withdrawAttoDai("1")).logs[0].event, "AttoDaiWithdrawn");
-    assert.equal((await contracts.daiFi.borrowAttoDai("1")).logs[0].event, "AttoDaiBorrowed");
-    assert.equal((await contracts.daiFi.repayAttoDai("1")).logs[0].event, "AttoDaiRepaid");
+    truffleAssert.eventEmitted(await contracts.daiFi.supplyAttoDai("1"), "AttoDaiSupplied");
+    truffleAssert.eventEmitted(await contracts.daiFi.withdrawAttoDai("1"), "AttoDaiWithdrawn");
+    truffleAssert.eventEmitted(await contracts.daiFi.borrowAttoDai("1"), "AttoDaiBorrowed");
+    truffleAssert.eventEmitted(await contracts.daiFi.repayAttoDai("1"), "AttoDaiRepaid");
   });
 
 //================ SUPPLY WEI ================
 
   it("should fail when supplying 0 Wei", async () => {
     const contracts = await deployNewDaiFi();
-    try {
-      await contracts.daiFi.supplyWei();
-      throw null;
-    } catch (error) {
-      assertRevert(error, "supplied zero Wei");
-    }
+    truffleAssert.reverts(contracts.daiFi.supplyWei(), "supplied zero Wei");
   });
 
   it("should increase own wei balance when supplying Wei", async () => {
@@ -170,22 +161,12 @@ contract("DaiFi", async accounts => {
 
   it("should fail when withdrawing 0 Wei", async () => {
     const contracts = await deployNewDaiFi();
-    try {
-      await contracts.daiFi.withdrawWei("0");
-      throw null;
-    } catch (error) {
-      assertRevert(error, "withdrew zero Wei");
-    }
+    truffleAssert.reverts(contracts.daiFi.withdrawWei("0"), "withdrew zero Wei");
   });
 
   it("should fail when withdrawing more Wei than supplied", async () => {
     const contracts = await deployNewDaiFiAndSupplyWei("1");
-    try {
-      await contracts.daiFi.withdrawWei("2");
-      throw null;
-    } catch (error) {
-      assertRevert(error, "withdrew more Wei than supplied");
-    }
+    truffleAssert.reverts(contracts.daiFi.withdrawWei("2"), "withdrew more Wei than supplied");
   });
 
   it("should increase sender's wei balance when withdrawing Wei", async () => {
@@ -220,12 +201,7 @@ contract("DaiFi", async accounts => {
 
   it("should fail when borrowing 0 Wei", async () => {
     const contracts = await deployNewDaiFiAndTransferAndCollateraliseWei(accounts, "1");
-    try {
-      await contracts.daiFi.borrowWei("0");
-      throw null;
-    } catch (error) {
-      assertRevert(error, "borrowed zero Wei");
-    }
+    truffleAssert.reverts(contracts.daiFi.borrowWei("0"), "borrowed zero Wei");
   });
 
   it("should increase sender's wei balance when borrowing Wei", async () => {
@@ -260,22 +236,12 @@ contract("DaiFi", async accounts => {
 
   it("should fail when repaying 0 Wei", async () => {
     const contracts = await deployNewDaiFi();
-    try {
-      await contracts.daiFi.repayWei();
-      throw null;
-    } catch (error) {
-      assertRevert(error, "repaid zero Wei");
-    }
+    truffleAssert.reverts(contracts.daiFi.repayWei(), "repaid zero Wei");
   });
 
   it("should fail when repaying more Wei than borrowed", async () => {
     const contracts = await deployNewDaiFiAndTransferAndCollateraliseAndBorrowWei(accounts, "1");
-    try {
-      await contracts.daiFi.repayWei({value: "2"});
-      throw null;
-    } catch (error) {
-      assertRevert(error, "repaid more Wei than borrowed");
-    }
+    truffleAssert.reverts(contracts.daiFi.repayWei({value: "2"}), "repaid more Wei than borrowed");
   });
 
   it("should increase own wei balance when repaying Wei", async () => {
@@ -310,24 +276,14 @@ contract("DaiFi", async accounts => {
 
   it("should fail when supplying 0 attoDai", async () => {
     const contracts = await deployNewDaiFi();
-    try {
-      await contracts.daiFi.supplyAttoDai("0");
-      throw null;
-    } catch (error) {
-      assertRevert(error, "supplied zero attoDai");
-    }
+    truffleAssert.reverts(contracts.daiFi.supplyAttoDai("0"), "supplied zero attoDai");
   });
 
   it("should fail when supplying unapproved attoDai", async () => {
     const contracts = await deployNewDaiFi();
     await contracts.mockDai.mint(accounts[0], "2");
     await contracts.mockDai.approve(contracts.daiFi.address, "1");
-    try {
-      await contracts.daiFi.supplyAttoDai("2");
-      throw null;
-    } catch (error) {
-      assertRevert(error, "ERC20: transfer amount exceeds allowance");
-    }
+    truffleAssert.reverts(contracts.daiFi.supplyAttoDai("2"), "ERC20: transfer amount exceeds allowance");
   });
 
   it("should increase own attoDai balance when supplying attoDai", async () => {
@@ -361,22 +317,12 @@ contract("DaiFi", async accounts => {
 
   it("should fail when withdrawing 0 attoDai", async () => {
     const contracts = await deployNewDaiFi();
-    try {
-      await contracts.daiFi.withdrawAttoDai("0");
-      throw null;
-    } catch (error) {
-      assertRevert(error, "withdrew zero attoDai");
-    }
+    truffleAssert.reverts(contracts.daiFi.withdrawAttoDai("0"), "withdrew zero attoDai");
   });
 
   it("should fail when withdrawing more attoDai than supplied", async () => {
     const contracts = await deployNewDaiFiAndApproveAndSupplyAttoDai(accounts, "1");
-    try {
-      await contracts.daiFi.withdrawAttoDai("2");
-      throw null;
-    } catch (error) {
-      assertRevert(error, "withdrew more attoDai than supplied");
-    }
+    truffleAssert.reverts(contracts.daiFi.withdrawAttoDai("2"), "withdrew more attoDai than supplied");
   });
 
   it("should increase sender's attoDai balance when withdrawing attoDai", async () => {
@@ -411,12 +357,7 @@ contract("DaiFi", async accounts => {
 
   it("should fail when borrowing 0 attoDai", async () => {
     const contracts = await deployNewDaiFiAndTransferAndCollateraliseAttoDai(accounts, "1");
-    try {
-      await contracts.daiFi.borrowAttoDai("0");
-      throw null;
-    } catch (error) {
-      assertRevert(error, "borrowed zero attoDai");
-    }
+    truffleAssert.reverts(contracts.daiFi.borrowAttoDai("0"), "borrowed zero attoDai");
   });
 
   it("should increase sender's attoDai balance when borrowing attoDai", async () => {
@@ -451,35 +392,20 @@ contract("DaiFi", async accounts => {
 
   it("should fail when repaying 0 attoDai", async () => {
     const contracts = await deployNewDaiFi();
-    try {
-      await contracts.daiFi.repayAttoDai("0");
-      throw null;
-    } catch (error) {
-      assertRevert(error, "repaid zero attoDai");
-    }
+    truffleAssert.reverts(contracts.daiFi.repayAttoDai("0"), "repaid zero attoDai");
   });
 
   it("should fail when repaying unapproved attoDai", async () => {
     const contracts = await deployNewDaiFiAndTransferAndCollateraliseAndBorrowAttoDai(accounts, "2");
     await contracts.mockDai.approve(contracts.daiFi.address, "1");
-    try {
-      await contracts.daiFi.repayAttoDai("2");
-      throw null;
-    } catch (error) {
-      assertRevert(error, "ERC20: transfer amount exceeds allowance");
-    }
+    truffleAssert.reverts(contracts.daiFi.repayAttoDai("2"), "ERC20: transfer amount exceeds allowance");
   });
 
   it("should fail when repaying more attoDai than borrowed", async () => {
     const contracts = await deployNewDaiFiAndTransferAndCollateraliseAndBorrowAttoDai(accounts, "1");
     await contracts.mockDai.mint(accounts[0], "1");
     await contracts.mockDai.approve(contracts.daiFi.address, "2");
-    try {
-      await contracts.daiFi.repayAttoDai("2");
-      throw null;
-    } catch (error) {
-      assertRevert(error, "repaid more attoDai than borrowed");
-    }
+    truffleAssert.reverts(contracts.daiFi.repayAttoDai("2"), "repaid more attoDai than borrowed");
   });
 
   it("should increase own attoDai balance when repaying attoDai", async () => {
