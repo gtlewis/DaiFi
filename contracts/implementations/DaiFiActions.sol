@@ -68,7 +68,7 @@ contract DaiFiActions is IActions, DaiFiCollateral, ReentrancyGuard {
 
         totalWei.supplied = totalWei.supplied.sub(amount);
         accounts[msg.sender].wei_.supplied = accounts[msg.sender].wei_.supplied.sub(amount);
-        require(isCollateralisedForWei(accounts[msg.sender]), "not enough collateral");
+        require(isCollateralisedForAttoDai(accounts[msg.sender]), "not enough collateral");
 
         msg.sender.transfer(amount);
 
@@ -131,7 +131,7 @@ contract DaiFiActions is IActions, DaiFiCollateral, ReentrancyGuard {
 
         totalAttoDai.supplied = totalAttoDai.supplied.sub(amount);
         accounts[msg.sender].attoDai.supplied = accounts[msg.sender].attoDai.supplied.sub(amount);
-        require(isCollateralisedForAttoDai(accounts[msg.sender]), "not enough collateral");
+        require(isCollateralisedForWei(accounts[msg.sender]), "not enough collateral");
 
         require(Token.transferTo(daiAddress, msg.sender, amount), "dai transfer failed");
 

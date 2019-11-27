@@ -160,6 +160,11 @@ contract("DaiFiActions", async accounts => {
     truffleAssert.reverts(contracts.daiFi.withdrawWei("2"), "withdrew more Wei than supplied");
   });
 
+  it("should fail when withdrawing Wei required as collateral", async () => {
+    const contracts = await deployContractsAndTransferAndCollateraliseAndBorrowAttoDai(accounts, "1");
+    truffleAssert.reverts(contracts.daiFi.withdrawWei("1"), "not enough collateral");
+  });
+
   it("should increase sender's wei balance when withdrawing Wei", async () => {
     const contracts = await deployContractsAndSupplyWei("1000000000000000001");
     const initialBalance = BigNumber(await web3.eth.getBalance(accounts[0]));
@@ -193,6 +198,12 @@ contract("DaiFiActions", async accounts => {
   it("should fail when borrowing 0 Wei", async () => {
     const contracts = await deployContractsAndTransferAndCollateraliseWei(accounts, "1");
     truffleAssert.reverts(contracts.daiFi.borrowWei("0"), "borrowed zero Wei");
+  });
+
+  it("should fail when borrowing Wei if insufficient collateral", async () => {
+    const contracts = await setup.deployContracts();
+    await transferWei(contracts, accounts, "1");
+    truffleAssert.reverts(contracts.daiFi.borrowWei("1"), "not enough collateral");
   });
 
   it("should increase sender's wei balance when borrowing Wei", async () => {
@@ -318,6 +329,12 @@ contract("DaiFiActions", async accounts => {
     truffleAssert.reverts(contracts.daiFi.withdrawAttoDai("2"), "withdrew more attoDai than supplied");
   });
 
+  it("should fail when withdrawing attoDai required as collateral", async () => {
+    const contracts = await deployContractsAndTransferAndCollateraliseAndBorrowWei(accounts, "1");
+    const attoDaiPerWei = BigNumber(await contracts.mockDaiPriceOracle.read()).div("1000000000000000000");
+    truffleAssert.reverts(contracts.daiFi.withdrawAttoDai(attoDaiPerWei.times("1").toFixed(0)), "not enough collateral");
+  });
+
   it("should increase sender's attoDai balance when withdrawing attoDai", async () => {
     const contracts = await deployContractsAndApproveAndSupplyAttoDai(accounts, "1000000000000000001");
     assert.equal(await contracts.mockDai.balanceOf(accounts[0]), "0");
@@ -351,6 +368,12 @@ contract("DaiFiActions", async accounts => {
   it("should fail when borrowing 0 attoDai", async () => {
     const contracts = await deployContractsAndTransferAndCollateraliseAttoDai(accounts, "1");
     truffleAssert.reverts(contracts.daiFi.borrowAttoDai("0"), "borrowed zero attoDai");
+  });
+
+  it("should fail when borrowing attoDai if insufficient collateral", async () => {
+    const contracts = await setup.deployContracts();
+    await transferAttoDai(contracts, accounts, "1");
+    truffleAssert.reverts(contracts.daiFi.borrowAttoDai("1"), "not enough collateral");
   });
 
   it("should increase sender's attoDai balance when borrowing attoDai", async () => {
