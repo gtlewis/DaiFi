@@ -1,12 +1,11 @@
-const DaiFi = artifacts.require("DaiFi");
-
+const setup = require("./setup");
 const truffleAssert = require('truffle-assertions');
 
 contract("DaiFi", async accounts => {
 
   it("should fail whenever value sent", async () => {
-    const daiFi = await DaiFi.new("0x0000000000000000000000000000000000000000", "0x0000000000000000000000000000000000000000");
-    truffleAssert.reverts(daiFi.send("1"), "revert");
+    const contracts = await setup.deployContracts();
+    truffleAssert.reverts(contracts.daiFi.send("1"), "revert");
   });
 
 });

@@ -1,23 +1,13 @@
-const MockDai = artifacts.require("MockERC20");
-const MockDaiPriceOracle = artifacts.require("MockDaiPriceOracle");
-const DaiFi = artifacts.require("DaiFi");
-
+const setup = require("./setup");
 const BigNumber = require('bignumber.js');
 BigNumber.set({ROUNDING_MODE: 1});
 
 const MAX_UINT256 = "115792089237316195423570985008687907853269984665640564039457584007913129639935";
 
-async function deployNewDaiFi() {
-  const mockDai = await MockDai.new();
-  const mockDaiPriceOracle = await MockDaiPriceOracle.new();
-  const daiFi = await DaiFi.new(mockDai.address, mockDaiPriceOracle.address);
-  return {daiFi, mockDai, mockDaiPriceOracle};
-}
-
-contract("DaiFi", async accounts => {
+contract("DaiFiCollateral", async accounts => {
 
   it("should determine collateralised for Wei only when sufficient attoDai is supplied", async () => {
-    const contracts = await deployNewDaiFi();
+    const contracts = await setup.deployContracts();
     const attoDaiPerWei = BigNumber(await contracts.mockDaiPriceOracle.read()).div("1000000000000000000");
     const account = {wei_: {supplied: "0", borrowed: "0"}, attoDai:{supplied: "0", borrowed: "0"}};
     assert.equal(await contracts.daiFi.isCollateralisedForWei(account), true);
@@ -43,7 +33,7 @@ contract("DaiFi", async accounts => {
   });
 
   it("should determine collateralised for attoDai only when sufficient Wei is supplied", async () => {
-    const contracts = await deployNewDaiFi();
+    const contracts = await setup.deployContracts();
     const attoDaiPerWei = BigNumber(await contracts.mockDaiPriceOracle.read()).div("1000000000000000000");
     const account = {wei_: {supplied: "0", borrowed: "0"}, attoDai:{supplied: "0", borrowed: "0"}};
     assert.equal(await contracts.daiFi.isCollateralisedForAttoDai(account), true);
@@ -69,7 +59,7 @@ contract("DaiFi", async accounts => {
   });
 
   it("should determine can be liquidated if wei borrowed and insufficient attoDai supplied", async () => {
-    const contracts = await deployNewDaiFi();
+    const contracts = await setup.deployContracts();
     const attoDaiPerWei = BigNumber(await contracts.mockDaiPriceOracle.read()).div("1000000000000000000");
     const account = {wei_: {supplied: "0", borrowed: "0"}, attoDai:{supplied: "0", borrowed: "0"}};
     assert.equal(await contracts.daiFi.canBeLiquidated(account), false);
@@ -95,7 +85,7 @@ contract("DaiFi", async accounts => {
   });
 
   it("should determine can be liquidated if attoDai borrowed and insufficient wei supplied", async () => {
-    const contracts = await deployNewDaiFi();
+    const contracts = await setup.deployContracts();
     const attoDaiPerWei = BigNumber(await contracts.mockDaiPriceOracle.read()).div("1000000000000000000");
     const account = {wei_: {supplied: "0", borrowed: "0"}, attoDai:{supplied: "0", borrowed: "0"}};
     assert.equal(await contracts.daiFi.canBeLiquidated(account), false);
