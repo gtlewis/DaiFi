@@ -31,14 +31,23 @@ contract WeiAttoDaiPriceFeed is IPriceFeed {
     }
 
     /**
+    * @notice Reads the latest price from the Dai price oracle (private view)
+    * @dev requires the price to be non-zero and less than 2^128
+    * @return The latest Wei price
+    */
+    function readPrice() private view returns (uint256) {
+        uint256 attoDaiPerEth = IPriceOracle(daiPriceOracle).read();
+        require(attoDaiPerEth != 0 && attoDaiPerEth == uint128(attoDaiPerEth), "invalid Dai price");
+        return attoDaiPerEth;
+    }
+
+    /**
     * @notice Returns the latest price from the feed of attoDai for the given amount of Wei (public view)
     * @param amount The amount of Wei
     * @return The latest attoDai price
     */
     function getLatestQuotePrice(uint256 amount) public view returns (uint256) {
-        uint256 attoDaiPerEth = IPriceOracle(daiPriceOracle).read();
-        require(attoDaiPerEth != 0, "invalid Dai price");
-        return amount.mul(attoDaiPerEth).div(ETH_TO_WEI);
+        return amount.mul(readPrice()).div(ETH_TO_WEI);
     }
 
     /**
@@ -47,8 +56,6 @@ contract WeiAttoDaiPriceFeed is IPriceFeed {
     * @return The latest Wei price
     */
     function getLatestBasePrice(uint256 amount) public view returns (uint256) {
-        uint256 attoDaiPerEth = IPriceOracle(daiPriceOracle).read();
-        require(attoDaiPerEth != 0, "invalid Dai price");
-        return amount.mul(ETH_TO_WEI).div(attoDaiPerEth);
+        return amount.mul(ETH_TO_WEI).div(readPrice());
     }
 }

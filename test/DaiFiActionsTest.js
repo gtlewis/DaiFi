@@ -1,4 +1,4 @@
-const setup = require("./setup");
+const { deployContracts } = require("./setup");
 const truffleAssert = require('truffle-assertions');
 const BigNumber = require('bignumber.js');
 BigNumber.set({ROUNDING_MODE: 1});
@@ -6,13 +6,13 @@ BigNumber.set({ROUNDING_MODE: 1});
 //================ WEI HELPER FUNCTIONS ================
 
 async function deployContractsAndSupplyWei(amount) {
-  const contracts = await setup.deployContracts();
+  const contracts = await deployContracts();
   await contracts.daiFi.supplyWei({value: amount});
   return contracts;
 }
 
 async function deployContractsAndTransferAndCollateraliseWei(accounts, amount) {
-  const contracts = await setup.deployContracts();
+  const contracts = await deployContracts();
   await transferWei(contracts, accounts, amount);
   await collateraliseWei(contracts, accounts, amount);
   return contracts;
@@ -39,7 +39,7 @@ async function collateraliseWei(contracts, accounts, amount) {
 //================ ATTODAI HELPER FUNCTIONS ================
 
 async function deployContractsAndApproveAttoDai(accounts, amount) {
-  const contracts = await setup.deployContracts();
+  const contracts = await deployContracts();
   await contracts.mockDai.mint(accounts[0], amount);
   await contracts.mockDai.approve(contracts.daiFi.address, amount);
   return contracts;
@@ -52,7 +52,7 @@ async function deployContractsAndApproveAndSupplyAttoDai(accounts, amount) {
 }
 
 async function deployContractsAndTransferAndCollateraliseAttoDai(accounts, amount) {
-  const contracts = await setup.deployContracts();
+  const contracts = await deployContracts();
   await transferAttoDai(contracts, accounts, amount);
   await collateraliseAttoDai(contracts, accounts, amount);
   return contracts;
@@ -87,7 +87,7 @@ async function collateraliseAttoDai(contracts, accounts, amount) {
 contract("DaiFiActions", async accounts => {
 
   it("should initialise all supplied and borrowed balances as zero", async () => {
-    const contracts = await setup.deployContracts();
+    const contracts = await deployContracts();
     assert.equal((await contracts.daiFi.getTotalWei()).supplied, "0");
     assert.equal((await contracts.daiFi.getTotalWei()).borrowed, "0");
     assert.equal((await contracts.daiFi.getAccount(accounts[0]))["wei_"].supplied, "0");
@@ -100,7 +100,7 @@ contract("DaiFiActions", async accounts => {
   });
 
   it("should emit events for all actions", async () => {
-    let contracts = await setup.deployContracts();
+    let contracts = await deployContracts();
     await transferWei(contracts, accounts, "1");
     await collateraliseWei(contracts, accounts, "1");
     truffleAssert.eventEmitted(await contracts.daiFi.supplyWei({value: "1"}), "WeiSupplied");
@@ -120,7 +120,7 @@ contract("DaiFiActions", async accounts => {
 //================ SUPPLY WEI ================
 
   it("should fail when supplying 0 Wei", async () => {
-    const contracts = await setup.deployContracts();
+    const contracts = await deployContracts();
     truffleAssert.reverts(contracts.daiFi.supplyWei(), "supplied zero Wei");
   });
 
@@ -151,7 +151,7 @@ contract("DaiFiActions", async accounts => {
 //================ WITHDRAW WEI ================
 
   it("should fail when withdrawing 0 Wei", async () => {
-    const contracts = await setup.deployContracts();
+    const contracts = await deployContracts();
     truffleAssert.reverts(contracts.daiFi.withdrawWei("0"), "withdrew zero Wei");
   });
 
@@ -201,7 +201,7 @@ contract("DaiFiActions", async accounts => {
   });
 
   it("should fail when borrowing Wei if insufficient collateral", async () => {
-    const contracts = await setup.deployContracts();
+    const contracts = await deployContracts();
     await transferWei(contracts, accounts, "1");
     truffleAssert.reverts(contracts.daiFi.borrowWei("1"), "not enough collateral");
   });
@@ -238,7 +238,7 @@ contract("DaiFiActions", async accounts => {
 //================ REPAY WEI ================
 
   it("should fail when repaying 0 Wei", async () => {
-    const contracts = await setup.deployContracts();
+    const contracts = await deployContracts();
     truffleAssert.reverts(contracts.daiFi.repayWei(), "repaid zero Wei");
   });
 
@@ -279,12 +279,12 @@ contract("DaiFiActions", async accounts => {
 //================ SUPPLY ATTODAI ================
 
   it("should fail when supplying 0 attoDai", async () => {
-    const contracts = await setup.deployContracts();
+    const contracts = await deployContracts();
     truffleAssert.reverts(contracts.daiFi.supplyAttoDai("0"), "supplied zero attoDai");
   });
 
   it("should fail when supplying unapproved attoDai", async () => {
-    const contracts = await setup.deployContracts();
+    const contracts = await deployContracts();
     await contracts.mockDai.mint(accounts[0], "2");
     await contracts.mockDai.approve(contracts.daiFi.address, "1");
     truffleAssert.reverts(contracts.daiFi.supplyAttoDai("2"), "ERC20: transfer amount exceeds allowance");
@@ -320,7 +320,7 @@ contract("DaiFiActions", async accounts => {
 //================ WITHDRAW ATTODAI ================
 
   it("should fail when withdrawing 0 attoDai", async () => {
-    const contracts = await setup.deployContracts();
+    const contracts = await deployContracts();
     truffleAssert.reverts(contracts.daiFi.withdrawAttoDai("0"), "withdrew zero attoDai");
   });
 
@@ -371,7 +371,7 @@ contract("DaiFiActions", async accounts => {
   });
 
   it("should fail when borrowing attoDai if insufficient collateral", async () => {
-    const contracts = await setup.deployContracts();
+    const contracts = await deployContracts();
     await transferAttoDai(contracts, accounts, "1");
     truffleAssert.reverts(contracts.daiFi.borrowAttoDai("1"), "not enough collateral");
   });
@@ -408,7 +408,7 @@ contract("DaiFiActions", async accounts => {
 //================ REPAY ATTODAI ================
 
   it("should fail when repaying 0 attoDai", async () => {
-    const contracts = await setup.deployContracts();
+    const contracts = await deployContracts();
     truffleAssert.reverts(contracts.daiFi.repayAttoDai("0"), "repaid zero attoDai");
   });
 

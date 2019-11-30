@@ -44,7 +44,7 @@ contract DaiFi is DaiFiActions {
     }
 }
 
-// TODO: abstracted interest rate model / compounded interest
+// TODO: abstracted interest rate model / compounded interest (require rates never above MAX %)
 // TODO: abstract supplying and borrowing across wei / dai?
 // TODO: liquidisation
 // TODO: add timelocked admin?
