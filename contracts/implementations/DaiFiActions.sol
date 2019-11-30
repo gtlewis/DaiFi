@@ -3,6 +3,7 @@ pragma experimental ABIEncoderV2;
 
 import { IActions } from "../interfaces/IActions.sol";
 import { DaiFiCollateral } from "./DaiFiCollateral.sol";
+import { DaiFiInterest } from "./DaiFiInterest.sol";
 import { ReentrancyGuard } from "../lib/ReentrancyGuard.sol";
 import { SafeMath } from "../lib/SafeMath.sol";
 import { Token } from "../lib/Token.sol";
@@ -13,7 +14,7 @@ import { Types } from "../lib/Types.sol";
 * @notice Abstract contract for supported DaiFi actions
 * @author DaiFi
 */
-contract DaiFiActions is IActions, DaiFiCollateral, ReentrancyGuard {
+contract DaiFiActions is IActions, DaiFiCollateral, DaiFiInterest, ReentrancyGuard {
     using SafeMath for uint256;
 
     /**
@@ -52,8 +53,10 @@ contract DaiFiActions is IActions, DaiFiCollateral, ReentrancyGuard {
         require(msg.value != 0, "supplied zero Wei");
         require(accounts[msg.sender].wei_.borrowed == 0, "supplied Wei when already borrowing");
 
-        totalWei.supplied = totalWei.supplied.add(msg.value);
+        applySuppliedWeiInterest(msg.sender);
         accounts[msg.sender].wei_.supplied = accounts[msg.sender].wei_.supplied.add(msg.value);
+
+        totalWei.supplied = totalWei.supplied.add(msg.value);
 
         emit WeiSupplied(msg.sender, msg.value);
     }
@@ -64,11 +67,15 @@ contract DaiFiActions is IActions, DaiFiCollateral, ReentrancyGuard {
     */
     function withdrawWei(uint256 amount) external nonReentrant {
         require(amount != 0, "withdrew zero Wei");
+
+        applySuppliedWeiInterest(msg.sender);
         require(amount <= accounts[msg.sender].wei_.supplied, "withdrew more Wei than supplied");
+        accounts[msg.sender].wei_.supplied = accounts[msg.sender].wei_.supplied.sub(amount);
+
+        applyBorrowedAttoDaiInterest(msg.sender);
+        require(isCollateralisedForAttoDai(accounts[msg.sender]), "not enough collateral");
 
         totalWei.supplied = totalWei.supplied.sub(amount);
-        accounts[msg.sender].wei_.supplied = accounts[msg.sender].wei_.supplied.sub(amount);
-        require(isCollateralisedForAttoDai(accounts[msg.sender]), "not enough collateral");
 
         msg.sender.transfer(amount);
 
@@ -83,9 +90,13 @@ contract DaiFiActions is IActions, DaiFiCollateral, ReentrancyGuard {
         require(amount != 0, "borrowed zero Wei");
         require(accounts[msg.sender].wei_.supplied == 0, "borrowed Wei when already supplying");
 
-        totalWei.borrowed = totalWei.borrowed.add(amount);
+        applyBorrowedWeiInterest(msg.sender);
         accounts[msg.sender].wei_.borrowed = accounts[msg.sender].wei_.borrowed.add(amount);
+
+        applySuppliedAttoDaiInterest(msg.sender);
         require(isCollateralisedForWei(accounts[msg.sender]), "not enough collateral");
+
+        totalWei.borrowed = totalWei.borrowed.add(amount);
 
         msg.sender.transfer(amount);
 
@@ -97,12 +108,34 @@ contract DaiFiActions is IActions, DaiFiCollateral, ReentrancyGuard {
     */
     function repayWei() external payable nonReentrant {
         require(msg.value != 0, "repaid zero Wei");
-        require(msg.value <= accounts[msg.sender].wei_.borrowed, "repaid more Wei than borrowed");
 
-        totalWei.borrowed = totalWei.borrowed.sub(msg.value);
+        applyBorrowedWeiInterest(msg.sender);
+        require(msg.value <= accounts[msg.sender].wei_.borrowed, "repaid more Wei than borrowed");
         accounts[msg.sender].wei_.borrowed = accounts[msg.sender].wei_.borrowed.sub(msg.value);
 
+        totalWei.borrowed = totalWei.borrowed.sub(msg.value);
+
         emit WeiRepaid(msg.sender, msg.value);
+    }
+
+    /**
+    * @notice Apply the interest accumulated (since last applied) to the supplied Wei balance of the given account (public)
+    * param accountAddress The address of the account to apply interest to
+    */
+    function applySuppliedWeiInterest(address accountAddress) public {
+        // TODO: implement and test. Update lastApplied block number
+        calculateSuppliedWeiInterest(accounts[accountAddress]);
+        emit SuppliedWeiInterestApplied(accountAddress);
+    }
+
+    /**
+    * @notice Apply the interest accumulated (since last applied) to the borrowed Wei balance of the given account (public)
+    * param accountAddress The address of the account to apply interest to
+    */
+    function applyBorrowedWeiInterest(address accountAddress) public {
+        // TODO: implement and test. Update lastApplied block number
+        calculateBorrowedWeiInterest(accounts[accountAddress]);
+        emit BorrowedWeiInterestApplied(accountAddress);
     }
 
     /**
@@ -113,8 +146,10 @@ contract DaiFiActions is IActions, DaiFiCollateral, ReentrancyGuard {
         require(amount != 0, "supplied zero attoDai");
         require(accounts[msg.sender].attoDai.borrowed == 0, "supplied attoDai when already borrowing");
 
-        totalAttoDai.supplied = totalAttoDai.supplied.add(amount);
+        applySuppliedAttoDaiInterest(msg.sender);
         accounts[msg.sender].attoDai.supplied = accounts[msg.sender].attoDai.supplied.add(amount);
+
+        totalAttoDai.supplied = totalAttoDai.supplied.add(amount);
 
         require(Token.transferFrom(daiAddress, msg.sender, amount), "dai transfer failed");
 
@@ -127,11 +162,15 @@ contract DaiFiActions is IActions, DaiFiCollateral, ReentrancyGuard {
     */
     function withdrawAttoDai(uint256 amount) external nonReentrant {
         require(amount != 0, "withdrew zero attoDai");
+
+        applySuppliedAttoDaiInterest(msg.sender);
         require(amount <= accounts[msg.sender].attoDai.supplied, "withdrew more attoDai than supplied");
+        accounts[msg.sender].attoDai.supplied = accounts[msg.sender].attoDai.supplied.sub(amount);
+
+        applyBorrowedWeiInterest(msg.sender);
+        require(isCollateralisedForWei(accounts[msg.sender]), "not enough collateral");
 
         totalAttoDai.supplied = totalAttoDai.supplied.sub(amount);
-        accounts[msg.sender].attoDai.supplied = accounts[msg.sender].attoDai.supplied.sub(amount);
-        require(isCollateralisedForWei(accounts[msg.sender]), "not enough collateral");
 
         require(Token.transferTo(daiAddress, msg.sender, amount), "dai transfer failed");
 
@@ -146,9 +185,13 @@ contract DaiFiActions is IActions, DaiFiCollateral, ReentrancyGuard {
         require(amount != 0, "borrowed zero attoDai");
         require(accounts[msg.sender].attoDai.supplied == 0, "borrowed attoDai when already supplying");
 
-        totalAttoDai.borrowed = totalAttoDai.borrowed.add(amount);
+        applyBorrowedAttoDaiInterest(msg.sender);
         accounts[msg.sender].attoDai.borrowed = accounts[msg.sender].attoDai.borrowed.add(amount);
+
+        applySuppliedWeiInterest(msg.sender);
         require(isCollateralisedForAttoDai(accounts[msg.sender]), "not enough collateral");
+
+        totalAttoDai.borrowed = totalAttoDai.borrowed.add(amount);
 
         require(Token.transferTo(daiAddress, msg.sender, amount), "dai transfer failed");
 
@@ -161,13 +204,35 @@ contract DaiFiActions is IActions, DaiFiCollateral, ReentrancyGuard {
     */
     function repayAttoDai(uint256 amount) external nonReentrant {
         require(amount != 0, "repaid zero attoDai");
+
+        applyBorrowedAttoDaiInterest(msg.sender);
         require(amount <= accounts[msg.sender].attoDai.borrowed, "repaid more attoDai than borrowed");
+        accounts[msg.sender].attoDai.borrowed = accounts[msg.sender].attoDai.borrowed.sub(amount);
 
         totalAttoDai.borrowed = totalAttoDai.borrowed.sub(amount);
-        accounts[msg.sender].attoDai.borrowed = accounts[msg.sender].attoDai.borrowed.sub(amount);
 
         require(Token.transferFrom(daiAddress, msg.sender, amount), "dai transfer failed");
 
         emit AttoDaiRepaid(msg.sender, amount);
+    }
+
+    /**
+    * @notice Apply the interest accumulated (since last applied) to the supplied attoDai balance of the given account (public)
+    * param accountAddress The address of the account to apply interest to
+    */
+    function applySuppliedAttoDaiInterest(address accountAddress) public {
+        // TODO: implement and test. Update lastApplied block number
+        calculateSuppliedAttoDaiInterest(accounts[accountAddress]);
+        emit SuppliedAttoDaiInterestApplied(accountAddress);
+    }
+
+    /**
+    * @notice Apply the interest accumulated (since last applied) to the borrowed attoDai balance of the given account (public)
+    * param accountAddress The address of the account to apply interest to
+    */
+    function applyBorrowedAttoDaiInterest(address accountAddress) public {
+        // TODO: implement and test. Update lastApplied block number
+        calculateBorrowedAttoDaiInterest(accounts[accountAddress]);
+        emit BorrowedAttoDaiInterestApplied(accountAddress);
     }
 }
