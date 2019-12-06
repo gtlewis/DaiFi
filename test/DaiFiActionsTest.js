@@ -103,18 +103,38 @@ contract("DaiFiActions", async accounts => {
     let contracts = await deployContracts();
     await transferWei(contracts, accounts, "1");
     await collateraliseWei(contracts, accounts, "1");
-    truffleAssert.eventEmitted(await contracts.daiFi.supplyWei({value: "1"}), "WeiSupplied");
-    truffleAssert.eventEmitted(await contracts.daiFi.withdrawWei("1"), "WeiWithdrawn");
-    truffleAssert.eventEmitted(await contracts.daiFi.borrowWei("1"), "WeiBorrowed");
-    truffleAssert.eventEmitted(await contracts.daiFi.repayWei({value: "1"}), "WeiRepaid");
+    let result = await contracts.daiFi.supplyWei({value: "1"});
+    truffleAssert.eventEmitted(result, "WeiSupplied");
+    truffleAssert.eventEmitted(result, "SuppliedWeiInterestApplied");
+    result = await contracts.daiFi.withdrawWei("1");
+    truffleAssert.eventEmitted(result, "WeiWithdrawn");
+    truffleAssert.eventEmitted(result, "SuppliedWeiInterestApplied");
+    truffleAssert.eventEmitted(result, "BorrowedAttoDaiInterestApplied");
+    result = await contracts.daiFi.borrowWei("1");
+    truffleAssert.eventEmitted(result, "WeiBorrowed");
+    truffleAssert.eventEmitted(result, "BorrowedWeiInterestApplied");
+    truffleAssert.eventEmitted(result, "SuppliedAttoDaiInterestApplied");
+    result = await contracts.daiFi.repayWei({value: "1"});
+    truffleAssert.eventEmitted(result, "WeiRepaid");
+    truffleAssert.eventEmitted(result, "BorrowedWeiInterestApplied");
 
     contracts = await deployContractsAndApproveAttoDai(accounts, "2");
     await transferAttoDai(contracts, accounts, "1");
     await collateraliseAttoDai(contracts, accounts, "1");
-    truffleAssert.eventEmitted(await contracts.daiFi.supplyAttoDai("1"), "AttoDaiSupplied");
-    truffleAssert.eventEmitted(await contracts.daiFi.withdrawAttoDai("1"), "AttoDaiWithdrawn");
-    truffleAssert.eventEmitted(await contracts.daiFi.borrowAttoDai("1"), "AttoDaiBorrowed");
-    truffleAssert.eventEmitted(await contracts.daiFi.repayAttoDai("1"), "AttoDaiRepaid");
+    result = await contracts.daiFi.supplyAttoDai("1");
+    truffleAssert.eventEmitted(result, "AttoDaiSupplied");
+    truffleAssert.eventEmitted(result, "SuppliedAttoDaiInterestApplied");
+    result = await contracts.daiFi.withdrawAttoDai("1");
+    truffleAssert.eventEmitted(result, "AttoDaiWithdrawn");
+    truffleAssert.eventEmitted(result, "SuppliedAttoDaiInterestApplied");
+    truffleAssert.eventEmitted(result, "BorrowedWeiInterestApplied");
+    result = await contracts.daiFi.borrowAttoDai("1");
+    truffleAssert.eventEmitted(result, "AttoDaiBorrowed");
+    truffleAssert.eventEmitted(result, "BorrowedAttoDaiInterestApplied");
+    truffleAssert.eventEmitted(result, "SuppliedWeiInterestApplied");
+    result = await contracts.daiFi.repayAttoDai("1");
+    truffleAssert.eventEmitted(result, "AttoDaiRepaid");
+    truffleAssert.eventEmitted(result, "BorrowedAttoDaiInterestApplied");
   });
 
 //================ SUPPLY WEI ================

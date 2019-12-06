@@ -123,8 +123,12 @@ contract DaiFiActions is IActions, DaiFiCollateral, DaiFiInterest, ReentrancyGua
     * param accountAddress The address of the account to apply interest to
     */
     function applySuppliedWeiInterest(address accountAddress) public {
+        require(accountAddress != address(0), "applied interest to address 0x0");
+
         // TODO: implement and test. Update lastApplied block number
-        calculateSuppliedWeiInterest(accounts[accountAddress]);
+        uint256 interest = calculateSuppliedWeiInterest(accounts[accountAddress]);
+        accounts[accountAddress].wei_.supplied = accounts[accountAddress].wei_.supplied.add(interest);
+        totalWei.supplied = totalWei.supplied.add(interest);
         emit SuppliedWeiInterestApplied(accountAddress);
     }
 
@@ -133,8 +137,12 @@ contract DaiFiActions is IActions, DaiFiCollateral, DaiFiInterest, ReentrancyGua
     * param accountAddress The address of the account to apply interest to
     */
     function applyBorrowedWeiInterest(address accountAddress) public {
+        require(accountAddress != address(0), "applied interest to address 0x0");
+
         // TODO: implement and test. Update lastApplied block number
-        calculateBorrowedWeiInterest(accounts[accountAddress]);
+        uint256 interest = calculateBorrowedWeiInterest(accounts[accountAddress]);
+        accounts[accountAddress].wei_.borrowed = accounts[accountAddress].wei_.borrowed.add(interest);
+        totalWei.borrowed = totalWei.borrowed.add(interest);
         emit BorrowedWeiInterestApplied(accountAddress);
     }
 
@@ -221,8 +229,12 @@ contract DaiFiActions is IActions, DaiFiCollateral, DaiFiInterest, ReentrancyGua
     * param accountAddress The address of the account to apply interest to
     */
     function applySuppliedAttoDaiInterest(address accountAddress) public {
+        require(accountAddress != address(0), "applied interest to address 0x0");
+
         // TODO: implement and test. Update lastApplied block number
-        calculateSuppliedAttoDaiInterest(accounts[accountAddress]);
+        uint256 interest = calculateSuppliedAttoDaiInterest(accounts[accountAddress]);
+        accounts[accountAddress].attoDai.supplied = accounts[accountAddress].attoDai.supplied.add(interest);
+        totalAttoDai.supplied = totalAttoDai.supplied.add(interest);
         emit SuppliedAttoDaiInterestApplied(accountAddress);
     }
 
@@ -231,8 +243,12 @@ contract DaiFiActions is IActions, DaiFiCollateral, DaiFiInterest, ReentrancyGua
     * param accountAddress The address of the account to apply interest to
     */
     function applyBorrowedAttoDaiInterest(address accountAddress) public {
+        require(accountAddress != address(0), "applied interest to address 0x0");
+
         // TODO: implement and test. Update lastApplied block number
-        calculateBorrowedAttoDaiInterest(accounts[accountAddress]);
+        uint256 interest = calculateBorrowedAttoDaiInterest(accounts[accountAddress]);
+        accounts[accountAddress].attoDai.borrowed = accounts[accountAddress].attoDai.borrowed.add(interest);
+        totalAttoDai.borrowed = totalAttoDai.borrowed.add(interest);
         emit BorrowedAttoDaiInterestApplied(accountAddress);
     }
 }

@@ -15,6 +15,11 @@ contract DaiFiCollateral is ICollateral, WeiAttoDaiPriceFeed {
     using SafeMath for uint256;
 
     /**
+    * @notice The number of basis points in 100% (private constant)
+    */
+     uint256 private constant BASIS_POINTS = 10000;
+
+    /**
     * @notice The minimum ratio of collateral (in basis points) that must be supplied in order to borrow (private constant)
     */
      uint256 private constant COLLATERALISATION_RATIO = 15000;
@@ -30,7 +35,7 @@ contract DaiFiCollateral is ICollateral, WeiAttoDaiPriceFeed {
     * @return The collateralisation threshold
     */
     function applyCollateralisationRatio(uint256 amount) private pure returns (uint256) {
-        return amount.mul(COLLATERALISATION_RATIO).div(10000);
+        return amount.mul(COLLATERALISATION_RATIO).div(BASIS_POINTS);
     }
 
     /**
@@ -39,7 +44,7 @@ contract DaiFiCollateral is ICollateral, WeiAttoDaiPriceFeed {
     * @return The liquidisation threshold
     */
     function applyLiquidisationRatio(uint256 amount) private pure returns (uint256) {
-        return amount.mul(LIQUIDISATION_RATIO).div(10000);
+        return amount.mul(LIQUIDISATION_RATIO).div(BASIS_POINTS);
     }
 
     /**

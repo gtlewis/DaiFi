@@ -36,28 +36,28 @@ interface IInterest {
 
     /**
     * @notice Calculate the interest accumulated (since last applied) to the supplied Wei balance of the given account (external pure)
-    * @param account The account to calcuate interest for
+    * @param account The account to calculate interest for
     * @return The amount of Wei accumulated in interest
     */
     function calculateSuppliedWeiInterest(Types.Account calldata account) external pure returns (uint256);
 
     /**
     * @notice Calculate the interest accumulated (since last applied) to the borrowed Wei balance of the given account (external pure)
-    * @param account The account to calcuate interest for
+    * @param account The account to calculate interest for
     * @return The amount of Wei accumulated in interest
     */
     function calculateBorrowedWeiInterest(Types.Account calldata account) external pure returns (uint256);
 
     /**
     * @notice Calculate the interest accumulated (since last applied) to the supplied attoDai balance of the given account (external pure)
-    * @param account The account to calcuate interest for
+    * @param account The account to calculate interest for
     * @return The amount of attoDai accumulated in interest
     */
     function calculateSuppliedAttoDaiInterest(Types.Account calldata account) external pure returns (uint256);
 
     /**
     * @notice Calculate the interest accumulated (since last applied) to the borrowed attoDai balance of the given account (external pure)
-    * @param account The account to calcuate interest for
+    * @param account The account to calculate interest for
     * @return The amount of attoDai accumulated in interest
     */
     function calculateBorrowedAttoDaiInterest(Types.Account calldata account) external pure returns (uint256);
