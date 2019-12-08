@@ -329,6 +329,64 @@ contract("DaiFiActions", async accounts => {
     assert.equal((await contracts.daiFi.getTotalWei()).borrowed, BigNumber("0").plus(borrowedWeiInterestBlock1).plus(borrowedWeiInterestBlock2));
   });
 
+//================ APPLY SUPPLIED WEI INTEREST ================
+
+  it("should fail when applying supplied Wei interest to address 0x0", async () => {
+    const contracts = await deployContracts();
+    truffleAssert.reverts(contracts.daiFi.applySuppliedWeiInterest("0x0000000000000000000000000000000000000000"), "applied interest to address 0x0");
+  });
+
+  it("should increase account's Wei supply when applying supplied Wei interest", async () => {
+    const contracts = await deployContractsAndSupplyWei("1000000000000000000");
+    const accountBlock0 = await contracts.daiFi.getAccount(accounts[0]);
+    const suppliedWeiInterestBlock1 = await contracts.daiFi.calculateSuppliedWeiInterest(accountBlock0);
+    await contracts.daiFi.applySuppliedWeiInterest(accounts[0]);
+    const accountBlock1 = await contracts.daiFi.getAccount(accounts[0]);
+    assert.equal(accountBlock1.wei_.supplied, BigNumber("1000000000000000000").plus(suppliedWeiInterestBlock1));
+    assert.equal(accountBlock1.wei_.borrowed, "0");
+    assert.equal(accountBlock1.attoDai.supplied, "0");
+    assert.equal(accountBlock1.attoDai.borrowed, "0");
+  });
+
+  it("should increase total Wei supply when applying supplied Wei interest", async () => {
+    const contracts = await deployContractsAndSupplyWei("1000000000000000000");
+    const accountBlock0 = await contracts.daiFi.getAccount(accounts[0]);
+    const suppliedWeiInterestBlock1 = await contracts.daiFi.calculateSuppliedWeiInterest(accountBlock0);
+    await contracts.daiFi.applySuppliedWeiInterest(accounts[0]);
+    assert.equal((await contracts.daiFi.getTotalWei()).supplied, BigNumber("1000000000000000000").plus(suppliedWeiInterestBlock1));
+  });
+
+//================ APPLY BORROWED WEI INTEREST ================
+
+  it("should fail when applying borrowed Wei interest to address 0x0", async () => {
+    const contracts = await deployContracts();
+    truffleAssert.reverts(contracts.daiFi.applyBorrowedWeiInterest("0x0000000000000000000000000000000000000000"), "applied interest to address 0x0");
+  });
+
+  it("should increase account's borrowed Wei when applying borrowed Wei interest", async () => {
+    const contracts = await deployContractsAndTransferAndCollateraliseWei(accounts, "1000000000000000000");
+    await contracts.daiFi.borrowWei("1000000000000000000");
+    const attoDaiPerWei = BigNumber(await contracts.mockDaiPriceOracle.read()).div("1000000000000000000");
+    const accountBlock0 = await contracts.daiFi.getAccount(accounts[0]);
+    const borrowedWeiInterestBlock1 = await contracts.daiFi.calculateBorrowedWeiInterest(accountBlock0);
+    const suppliedAttoDaiInterestBlock1 = await contracts.daiFi.calculateSuppliedAttoDaiInterest(accountBlock0);
+    await contracts.daiFi.applyBorrowedWeiInterest(accounts[0]);
+    const accountBlock1 = await contracts.daiFi.getAccount(accounts[0]);
+    assert.equal(accountBlock1.wei_.supplied, "0");
+    assert.equal(accountBlock1.wei_.borrowed, BigNumber("1000000000000000000").plus(borrowedWeiInterestBlock1));
+    assert.equal(accountBlock1.attoDai.supplied, accountBlock0.attoDai.supplied);
+    assert.equal(accountBlock1.attoDai.borrowed, "0");
+  });
+
+  it("should increase total borrowed Wei when applying borrowed Wei interest", async () => {
+    const contracts = await deployContractsAndTransferAndCollateraliseWei(accounts, "1000000000000000000");
+    await contracts.daiFi.borrowWei("1000000000000000000");
+    const accountBlock0 = await contracts.daiFi.getAccount(accounts[0]);
+    const borrowedWeiInterestBlock1 = await contracts.daiFi.calculateBorrowedWeiInterest(accountBlock0);
+    await contracts.daiFi.applyBorrowedWeiInterest(accounts[0]);
+    assert.equal((await contracts.daiFi.getTotalWei()).borrowed, BigNumber("1000000000000000000").plus(borrowedWeiInterestBlock1));
+  });
+
 //================ SUPPLY ATTODAI ================
 
   it("should fail when supplying 0 attoDai", async () => {
@@ -537,6 +595,64 @@ contract("DaiFiActions", async accounts => {
     await contracts.daiFi.repayAttoDai("1000000000000000000");
     const borrowedAttoDaiInterestBlock2 = await contracts.daiFi.calculateBorrowedAttoDaiInterest(accountBlock1);
     assert.equal((await contracts.daiFi.getTotalAttoDai()).borrowed, BigNumber("0").plus(borrowedAttoDaiInterestBlock1).plus(borrowedAttoDaiInterestBlock2));
+  });
+
+//================ APPLY SUPPLIED ATTODAI INTEREST ================
+
+  it("should fail when applying supplied attoDai interest to address 0x0", async () => {
+    const contracts = await deployContracts();
+    truffleAssert.reverts(contracts.daiFi.applySuppliedAttoDaiInterest("0x0000000000000000000000000000000000000000"), "applied interest to address 0x0");
+  });
+
+  it("should increase account's attoDai supply when applying supplied attoDai interest", async () => {
+    const contracts = await deployContractsAndApproveAndSupplyAttoDai(accounts, "1000000000000000000");
+    const accountBlock0 = await contracts.daiFi.getAccount(accounts[0]);
+    const suppliedAttoDaiInterestBlock1 = await contracts.daiFi.calculateSuppliedAttoDaiInterest(accountBlock0);
+    await contracts.daiFi.applySuppliedAttoDaiInterest(accounts[0]);
+    const accountBlock1 = await contracts.daiFi.getAccount(accounts[0]);
+    assert.equal(accountBlock1.wei_.supplied, "0");
+    assert.equal(accountBlock1.wei_.borrowed, "0");
+    assert.equal(accountBlock1.attoDai.supplied, BigNumber("1000000000000000000").plus(suppliedAttoDaiInterestBlock1));
+    assert.equal(accountBlock1.attoDai.borrowed, "0");
+  });
+
+  it("should increase total attoDai supply when applying supplied attoDai interest", async () => {
+    const contracts = await deployContractsAndApproveAndSupplyAttoDai(accounts, "1000000000000000000");
+    const accountBlock0 = await contracts.daiFi.getAccount(accounts[0]);
+    const suppliedAttoDaiInterestBlock1 = await contracts.daiFi.calculateSuppliedAttoDaiInterest(accountBlock0);
+    await contracts.daiFi.applySuppliedAttoDaiInterest(accounts[0]);
+    assert.equal((await contracts.daiFi.getTotalAttoDai()).supplied, BigNumber("1000000000000000000").plus(suppliedAttoDaiInterestBlock1));
+  });
+
+//================ APPLY BORROWED ATTODAI INTEREST ================
+
+  it("should fail when applying borrowed attoDai interest to address 0x0", async () => {
+    const contracts = await deployContracts();
+    truffleAssert.reverts(contracts.daiFi.applyBorrowedAttoDaiInterest("0x0000000000000000000000000000000000000000"), "applied interest to address 0x0");
+  });
+
+  it("should increase account's borrowed attoDai when applying borrowed attoDai interest", async () => {
+    const contracts = await deployContractsAndTransferAndCollateraliseAttoDai(accounts, "1000000000000000000");
+    await contracts.daiFi.borrowAttoDai("1000000000000000000");
+    const attoDaiPerWei = BigNumber(await contracts.mockDaiPriceOracle.read()).div("1000000000000000000");
+    const accountBlock0 = await contracts.daiFi.getAccount(accounts[0]);
+    const borrowedAttoDaiInterestBlock1 = await contracts.daiFi.calculateBorrowedAttoDaiInterest(accountBlock0);
+    const suppliedWeiInterestBlock1 = await contracts.daiFi.calculateSuppliedWeiInterest(accountBlock0);
+    await contracts.daiFi.applyBorrowedAttoDaiInterest(accounts[0]);
+    const accountBlock1 = await contracts.daiFi.getAccount(accounts[0]);
+    assert.equal(accountBlock1.wei_.supplied, accountBlock0.wei_.supplied);
+    assert.equal(accountBlock1.wei_.borrowed, "0");
+    assert.equal(accountBlock1.attoDai.supplied, "0");
+    assert.equal(accountBlock1.attoDai.borrowed, BigNumber("1000000000000000000").plus(borrowedAttoDaiInterestBlock1));
+  });
+
+  it("should increase total borrowed attoDai when applying borrowed attoDai interest", async () => {
+    const contracts = await deployContractsAndTransferAndCollateraliseAttoDai(accounts, "1000000000000000000");
+    await contracts.daiFi.borrowAttoDai("1000000000000000000");
+    const accountBlock0 = await contracts.daiFi.getAccount(accounts[0]);
+    const borrowedAttoDaiInterestBlock1 = await contracts.daiFi.calculateBorrowedAttoDaiInterest(accountBlock0);
+    await contracts.daiFi.applyBorrowedAttoDaiInterest(accounts[0]);
+    assert.equal((await contracts.daiFi.getTotalAttoDai()).borrowed, BigNumber("1000000000000000000").plus(borrowedAttoDaiInterestBlock1));
   });
 
 });
