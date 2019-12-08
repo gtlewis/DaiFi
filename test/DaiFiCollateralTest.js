@@ -8,7 +8,7 @@ contract("DaiFiCollateral", async accounts => {
   it("should determine collateralised for Wei only when sufficient attoDai is supplied", async () => {
     const { daiFi, mockDaiPriceOracle } = await deployContracts();
     const attoDaiPerWei = BigNumber(await mockDaiPriceOracle.read()).div("1000000000000000000");
-    const account = {wei_: {supplied: "0", borrowed: "0"}, attoDai:{supplied: "0", borrowed: "0"}};
+    const account = {wei_: {supplied: "0", borrowed: "0"}, attoDai: {supplied: "0", borrowed: "0"}};
     assert.equal(await daiFi.isCollateralisedForWei(account), true);
     account.wei_.borrowed = "1";
     assert.equal(await daiFi.isCollateralisedForWei(account), false);
@@ -34,7 +34,7 @@ contract("DaiFiCollateral", async accounts => {
   it("should determine collateralised for attoDai only when sufficient Wei is supplied", async () => {
     const { daiFi, mockDaiPriceOracle } = await deployContracts();
     const attoDaiPerWei = BigNumber(await mockDaiPriceOracle.read()).div("1000000000000000000");
-    const account = {wei_: {supplied: "0", borrowed: "0"}, attoDai:{supplied: "0", borrowed: "0"}};
+    const account = {wei_: {supplied: "0", borrowed: "0"}, attoDai: {supplied: "0", borrowed: "0"}};
     assert.equal(await daiFi.isCollateralisedForAttoDai(account), true);
     account.attoDai.borrowed = "1";
     assert.equal(await daiFi.isCollateralisedForAttoDai(account), false);
@@ -60,7 +60,7 @@ contract("DaiFiCollateral", async accounts => {
   it("should determine can be liquidated if wei borrowed and insufficient attoDai supplied", async () => {
     const { daiFi, mockDaiPriceOracle } = await deployContracts();
     const attoDaiPerWei = BigNumber(await mockDaiPriceOracle.read()).div("1000000000000000000");
-    const account = {wei_: {supplied: "0", borrowed: "0"}, attoDai:{supplied: "0", borrowed: "0"}};
+    const account = {wei_: {supplied: "0", borrowed: "0"}, attoDai: {supplied: "0", borrowed: "0"}};
     assert.equal(await daiFi.canBeLiquidated(account), false);
     account.wei_.borrowed = "1";
     assert.equal(await daiFi.canBeLiquidated(account), true);
@@ -86,7 +86,7 @@ contract("DaiFiCollateral", async accounts => {
   it("should determine can be liquidated if attoDai borrowed and insufficient wei supplied", async () => {
     const { daiFi, mockDaiPriceOracle } = await deployContracts();
     const attoDaiPerWei = BigNumber(await mockDaiPriceOracle.read()).div("1000000000000000000");
-    const account = {wei_: {supplied: "0", borrowed: "0"}, attoDai:{supplied: "0", borrowed: "0"}};
+    const account = {wei_: {supplied: "0", borrowed: "0"}, attoDai: {supplied: "0", borrowed: "0"}};
     assert.equal(await daiFi.canBeLiquidated(account), false);
     account.attoDai.borrowed = "1";
     assert.equal(await daiFi.canBeLiquidated(account), true);
