@@ -1,8 +1,7 @@
 const { deployContracts, deployContractsWithZeroPriceOracle, deployContractsWithAboveMaxPriceOracle, MAX_UINT256 } = require("./setup");
 const truffleAssert = require('truffle-assertions');
-
-async function mintAndApproveAttoDai(daiFi, mockDai, accounts, amount) {
-}
+const BigNumber = require('bignumber.js');
+BigNumber.set({ROUNDING_MODE: 1});
 
 contract("DaiFiSystemTests", async accounts => {
 
@@ -14,14 +13,14 @@ contract("DaiFiSystemTests", async accounts => {
     truffleAssert.fails(daiFi.borrowAttoDai(MAX_UINT256), "SafeMath: multiplication overflow");
     truffleAssert.fails(daiFi.borrowAttoDai("1000"), "not enough collateral");
     truffleAssert.fails(daiFi.borrowAttoDai("100"), "ERC20: transfer amount exceeds balance");
-    await mockDai.mint(accounts[1], "100");
-    await mockDai.approve(daiFi.address, "100", {from: accounts[1]});
-    await daiFi.supplyAttoDai("100", {from: accounts[1]});
+    await mockDai.mint(daiFi.address, "100");
     truffleAssert.passes(daiFi.borrowAttoDai("100"));
     truffleAssert.fails(daiFi.withdrawWei("1"), "not enough collateral");
-    await mockDai.approve(daiFi.address, "101");
-    truffleAssert.fails(daiFi.repayAttoDai("101"), "repaid more attoDai than borrowed");
-    truffleAssert.passes(daiFi.repayAttoDai("100"));
+    const borrowedAttoDaiInterest = await daiFi.calculateBorrowedAttoDaiInterest(await daiFi.getAccount(accounts[0]));
+    await mockDai.mint(accounts[0], borrowedAttoDaiInterest);
+    await mockDai.approve(daiFi.address, BigNumber("101").plus(borrowedAttoDaiInterest));
+    truffleAssert.fails(daiFi.repayAttoDai(BigNumber("101").plus(borrowedAttoDaiInterest)), "repaid more attoDai than borrowed");
+    truffleAssert.passes(daiFi.repayAttoDai(BigNumber("100").plus(borrowedAttoDaiInterest)));
     truffleAssert.passes(daiFi.withdrawWei("1"));
   });
 
@@ -42,8 +41,9 @@ contract("DaiFiSystemTests", async accounts => {
     await daiFi.supplyWei({value: "1", from: accounts[1]});
     truffleAssert.passes(daiFi.borrowWei("1"));
     truffleAssert.fails(daiFi.withdrawAttoDai("1000"), "not enough collateral");
-    truffleAssert.fails(daiFi.repayWei({value: "2"}), "repaid more Wei than borrowed");
-    truffleAssert.passes(daiFi.repayWei({value: "1"}));
+    const borrowedWeiInterest = await daiFi.calculateBorrowedWeiInterest(await daiFi.getAccount(accounts[0]));
+    truffleAssert.fails(daiFi.repayWei({value: BigNumber("2").plus(borrowedWeiInterest)}), "repaid more Wei than borrowed");
+    truffleAssert.passes(daiFi.repayWei({value: BigNumber("1").plus(borrowedWeiInterest)}));
     truffleAssert.passes(daiFi.withdrawAttoDai("1000"));
   });
 
@@ -84,7 +84,6 @@ contract("DaiFiSystemTests", async accounts => {
     truffleAssert.passes(daiFi.supplyAttoDai("1"));
     truffleAssert.passes(daiFi.withdrawAttoDai("1"));
     await mockDai.burn(accounts[0], "1");
-    await mintAndApproveAttoDai(daiFi, mockDai, accounts, MAX_UINT256);
     await mockDai.mint(accounts[0], MAX_UINT256);
     await mockDai.approve(daiFi.address, MAX_UINT256);
     truffleAssert.passes(daiFi.supplyAttoDai("1000"));
